@@ -38,13 +38,19 @@ Thumbs.db
 *.key
 *.pem
 
-# Eclipse
+# Eclipse / STS
 .project
 .classpath
 .settings/
-bin/
-tmp/
+.springBeans
+.sts4-cache
 
-# Optional (frontend / misc)
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/nbdist/
+/.nb-gradle/
+
+# Optional
 dist/
 coverage/
