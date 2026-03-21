@@ -1,0 +1,417 @@
+package com.nexus.service.ai;
+
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.nexus.dto.TopBoxerAiResponse;
+import org.springframework.stereotype.Service;
+
+@Service
+public class TopBoxerAiService {
+    private static final boolean USE_FULL_RUBRIC = false;
+
+    private static final String SHORT_RUBRIC = """
+Core rules:
+- Return exactly 10 boxers ranked 1–10.
+- heightCm and reachCm are real measurements (cm).
+- heightCm and reachCm should be based on commonly reported real-world values (e.g., BoxRec, Wikipedia, ESPN).
+- winRatio and knockoutRatio are decimals (0.0–1.0).
+- winRatio and knockoutRatio should reflect realistic career records.
+- All other attributes are scored 1.0–10.0.
+
+Scoring scale (apply to all attributes):
+1–2 = poor
+3–4 = below average
+5 = average pro
+6 = above average
+7 = strong
+8 = elite
+9 = world-class
+10 = all-time great
+
+Guidelines:
+- Score relative to the %s division.
+- Be consistent across all 10 fighters.
+- Avoid giving too many 10s.
+- Use realistic boxing knowledge.
+
+Attribute interpretation:
+- Physical = athletic ability (speed, strength, endurance)
+- Technical = skill execution (accuracy, defense, combinations)
+- Tactical = ring IQ and strategy
+- Psychological = composure, toughness, focus
+- Experience = quality of opposition and career level
+
+Ratios:
+- winRatio = wins / total fights
+- knockoutRatio = KO wins / total wins or total fights (be consistent)
+
+sourceNote:
+- Briefly mention reasoning (e.g., resume, skillset, opposition level).
+""";
+
+    private static final String FULL_RUBRIC = """
+Core instructions:
+- Return exactly 10 boxers.
+- rankingPosition must be 1 through 10.
+- Use historically defensible all-time rankings for this weight class.
+- heightCm and reachCm must be raw measurements in cm, based on known real-world measurements where available.
+- heightCm and reachCm should be based on commonly reported real-world values (e.g., BoxRec, Wikipedia, ESPN).
+- winRatio and knockoutRatio must be raw decimal values from 0.0 to 1.0.
+- winRatio and knockoutRatio should reflect realistic career records.
+- All other scored attributes must be numeric values from 1.0 to 10.0.
+- Use decimals if needed, for example 7.5.
+- sourceNote must briefly justify both selection and scoring basis in 1 to 3 sentences.
+- If exact measurements are uncertain, use the best-known commonly reported estimate.
+- Do not invent extra fields.
+- Field names must match the JSON schema exactly.
+
+Scoring standard:
+Use the following universal meaning across all scored 1-10 attributes unless a specific attribute rubric overrides it:
+- 1 to 2 = very poor
+- 3 to 4 = below average
+- 5 = average professional level
+- 6 = above average
+- 7 = strong / clearly good
+- 8 = elite
+- 9 = exceptional / world-class
+- 10 = near-ideal for the division / all-time level
+
+Important scoring rules:
+- heightCm and reachCm are NOT rubric scores. They are raw physical measurements in centimeters.
+- winRatio and knockoutRatio are NOT rubric scores. They are raw decimal ratios from 0.0 to 1.0.
+- titleFightExperience, strengthOfOpposition, recentFightActivity, and performanceConsistency ARE scored from 1.0 to 10.0 using the rubric below.
+- Score each boxer relative to the standards of the %s division, not across all divisions equally.
+- Be internally consistent across all 10 fighters.
+- Avoid giving too many 10.0 scores unless truly justified by all-time greatness in that specific attribute.
+
+Physical attribute rubrics:
+weightClassAlignment:
+- 1 = clearly undersized or drained; body type badly mismatched
+- 3 = noticeable disadvantage in size/frame or poor weight cut fit
+- 5 = acceptable fit for division
+- 7 = naturally strong fit; good frame and performance at the weight
+- 8 = very well suited physically to the division
+- 10 = ideal size/build for that division without sacrificing speed or stamina
+
+handSpeed:
+- 1 = very slow hands, easy to read
+- 3 = below-average speed
+- 5 = average pro hand speed
+- 7 = clearly fast hands, wins many exchanges by quickness
+- 8 = elite hand speed
+- 10 = exceptional, all-time great hand speed for the division
+
+footSpeed:
+- 1 = very slow movement
+- 3 = heavy-footed, struggles to reposition
+- 5 = average mobility
+- 7 = clearly quick on feet, good movement around ring
+- 8 = elite movement speed
+- 10 = extraordinary mobility and repositioning speed
+
+strength:
+- 1 = physically weak for division
+- 3 = below average strength
+- 5 = average pro strength
+- 7 = clearly strong, can bully opponents at times
+- 8 = elite strength for division
+- 10 = exceptional functional strength, dominant physically
+
+endurance:
+- 1 = fades very early
+- 3 = noticeable drop-off after a few rounds
+- 5 = average stamina over full fight
+- 7 = strong engine, remains effective late
+- 8 = elite endurance
+- 10 = near tireless; keeps pace and sharpness deep into fight
+
+reactionTime:
+- 1 = slow reactions, often late
+- 3 = below average reactions
+- 5 = average reaction speed
+- 7 = sharp reactions, catches cues well
+- 8 = elite reflex responsiveness
+- 10 = extraordinary reflexes and real-time responsiveness
+
+Technical attribute rubrics:
+punchAccuracy:
+- 1 = wild, rarely lands clean
+- 3 = below-average accuracy
+- 5 = average pro accuracy
+- 7 = accurate and efficient punch placement
+- 8 = elite accuracy
+- 10 = exceptional precision and consistent clean landing
+
+punchVariety:
+- 1 = very limited arsenal
+- 3 = small number of reliable punches
+- 5 = decent mix of basic punches
+- 7 = good variety used effectively
+- 8 = elite versatility in punch selection
+- 10 = complete arsenal used fluidly and intelligently
+
+defensiveGuardEfficiency:
+- 1 = guard often ineffective
+- 3 = inconsistent guard
+- 5 = average guard defense
+- 7 = strong guard, blocks many shots well
+- 8 = elite guard discipline and efficiency
+- 10 = exceptionally difficult to penetrate through guard
+
+headMovement:
+- 1 = almost no useful head movement
+- 3 = limited and inconsistent
+- 5 = average defensive movement
+- 7 = effective and regular head movement
+- 8 = elite evasive upper-body movement
+- 10 = exceptional slip/roll ability; very elusive
+
+footworkTechnique:
+- 1 = poor balance and movement mechanics
+- 3 = sloppy or inefficient footwork
+- 5 = average technical footwork
+- 7 = sound and effective footwork
+- 8 = elite footwork technique
+- 10 = masterful control of angles, balance, and positioning
+
+counterpunchingAbility:
+- 1 = rarely counters effectively
+- 3 = limited counter ability
+- 5 = average counter timing
+- 7 = strong counterpuncher
+- 8 = elite counterpunching
+- 10 = exceptional at reading and punishing mistakes
+
+combinationEfficiency:
+- 1 = poor combinations, disconnected attacks
+- 3 = basic combinations with low efficiency
+- 5 = average combination work
+- 7 = good, effective combinations
+- 8 = elite punch sequencing
+- 10 = highly efficient, fluid, damaging combinations
+
+Tactical attribute rubrics:
+ringIq:
+- 1 = poor decisions, easily outthought
+- 3 = limited tactical awareness
+- 5 = average boxing intelligence
+- 7 = smart fighter, good decisions
+- 8 = elite ring intelligence
+- 10 = exceptional tactical thinker, controls fight intellectually
+
+adaptabilityMidFight:
+- 1 = cannot adjust
+- 3 = slow/poor adjustments
+- 5 = average ability to adjust
+- 7 = makes useful adjustments during fight
+- 8 = elite adaptability
+- 10 = outstanding real-time adjustment ability
+
+distanceControl:
+- 1 = constantly at wrong range
+- 3 = weak control of distance
+- 5 = average range control
+- 7 = good control of engagement distance
+- 8 = elite range management
+- 10 = masterful control of range throughout fight
+
+tempoControl:
+- 1 = gets forced into opponent’s pace
+- 3 = struggles to control rhythm
+- 5 = average pace management
+- 7 = often controls tempo well
+- 8 = elite pace/rhythm control
+- 10 = dictates tempo almost completely
+
+opponentPatternRecognition:
+- 1 = poor at noticing patterns
+- 3 = limited recognition
+- 5 = average read of opponent
+- 7 = detects habits and exploits them
+- 8 = elite pattern recognition
+- 10 = exceptional at identifying and exploiting tendencies
+
+fightPlanningDiscipline:
+- 1 = abandons plan easily
+- 3 = inconsistent discipline
+- 5 = average game-plan discipline
+- 7 = generally follows strategy well
+- 8 = elite discipline in execution
+- 10 = exceptional commitment to tactical plan without losing flexibility
+
+Psychological attribute rubrics:
+composureUnderPressure:
+- 1 = panics badly under pressure
+- 3 = often rattled
+- 5 = average composure
+- 7 = stays calm in difficult moments
+- 8 = elite composure
+- 10 = exceptionally calm under sustained pressure
+
+aggressionControl:
+- 1 = wild, reckless aggression
+- 3 = often loses control
+- 5 = average control
+- 7 = controlled aggression, presses smartly
+- 8 = elite balance of pressure and discipline
+- 10 = perfect blend of assertiveness and restraint
+
+mentalToughness:
+- 1 = breaks mentally under adversity
+- 3 = weak under hardship
+- 5 = average toughness
+- 7 = resilient and determined
+- 8 = elite toughness
+- 10 = extraordinary grit and refusal to fold
+
+focusConsistency:
+- 1 = frequently loses focus
+- 3 = inconsistent concentration
+- 5 = average focus
+- 7 = strong concentration through most of fight
+- 8 = elite sustained focus
+- 10 = unwavering concentration from start to finish
+
+resilienceAfterKnockdown:
+- 1 = rarely recovers well
+- 3 = often badly affected after knockdown
+- 5 = average recovery
+- 7 = usually regains control reasonably well
+- 8 = elite recovery composure
+- 10 = exceptional ability to recover and re-enter fight strongly
+
+Experience and performance rubrics:
+titleFightExperience:
+- 1 = none
+- 3 = very limited exposure
+- 5 = some title-level experience
+- 7 = solid title-fight background
+- 8 = extensive high-level title experience
+- 10 = exceptional championship-level experience
+
+strengthOfOpposition:
+- 1 = very weak opposition
+- 3 = mostly limited opponents
+- 5 = average quality opposition
+- 7 = regularly fought strong opponents
+- 8 = elite level opposition quality
+- 10 = all-time great resume strength
+
+recentFightActivity:
+- 1 = very inactive
+- 3 = below ideal activity
+- 5 = acceptable activity level
+- 7 = active and sharp
+- 8 = very active at strong level
+- 10 = ideal recent activity without overuse
+
+performanceConsistency:
+- 1 = highly erratic performances
+- 3 = often inconsistent
+- 5 = average consistency
+- 7 = usually performs to level
+- 8 = elite reliability
+- 10 = exceptionally consistent high-level performance
+
+For winRatio and knockoutRatio:
+- winRatio = wins / total fights
+- knockoutRatio = knockout wins / total wins OR knockout wins / total fights
+- choose one reasonable standard and apply it consistently across all 10 boxers
+- mention briefly in sourceNote which standard you used if needed
+""";
+
+    private static final String SCORING_RUBRIC = USE_FULL_RUBRIC
+            ? FULL_RUBRIC
+            : SHORT_RUBRIC;
+
+    private final AiService aiService;
+    private final JsonMapper jsonMapper;
+
+    public TopBoxerAiService(AiService aiService, JsonMapper jsonMapper) {
+        this.aiService = aiService;
+        this.jsonMapper = jsonMapper;
+    }
+
+    private String extractJson(String response) {
+        int start = response.indexOf("{");
+        int end = response.lastIndexOf("}");
+
+        if (start == -1 || end == -1 || end < start) {
+            throw new RuntimeException("No valid JSON object found in AI response: " + response);
+        }
+
+        return response.substring(start, end + 1);
+    }
+
+    public TopBoxerAiResponse getTop10ForWeightClass(String weightClassName) {
+        String prompt = buildPrompt(weightClassName);
+        String response = aiService.chat(prompt);
+
+        try {
+            String json = extractJson(response);
+            System.out.println(json);
+            return jsonMapper.readValue(json, TopBoxerAiResponse.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse AI response: " + response, e);
+        }
+    }
+
+    private String buildPrompt(String weightClassName) {
+        return """
+You are a boxing analytics evaluator.
+
+Return ONLY valid JSON.
+Do not return markdown.
+Do not return explanations outside the JSON.
+Do not wrap the JSON in code fences.
+
+Task:
+Select the top 10 all-time boxers in the %s division.
+For each boxer, return fields that match the boxing analytics schema exactly.
+
+%s
+
+JSON format:
+{
+  "boxers": [
+    {
+      "rankingPosition": 1,
+      "boxerName": "",
+      "heightCm": 0,
+      "reachCm": 0,
+      "weightClassAlignment": 0,
+      "handSpeed": 0,
+      "footSpeed": 0,
+      "strength": 0,
+      "endurance": 0,
+      "reactionTime": 0,
+      "punchAccuracy": 0,
+      "punchVariety": 0,
+      "defensiveGuardEfficiency": 0,
+      "headMovement": 0,
+      "footworkTechnique": 0,
+      "counterpunchingAbility": 0,
+      "combinationEfficiency": 0,
+      "ringIq": 0,
+      "adaptabilityMidFight": 0,
+      "distanceControl": 0,
+      "tempoControl": 0,
+      "opponentPatternRecognition": 0,
+      "fightPlanningDiscipline": 0,
+      "composureUnderPressure": 0,
+      "aggressionControl": 0,
+      "mentalToughness": 0,
+      "focusConsistency": 0,
+      "resilienceAfterKnockdown": 0,
+      "winRatio": 0,
+      "knockoutRatio": 0,
+      "titleFightExperience": 0,
+      "strengthOfOpposition": 0,
+      "recentFightActivity": 0,
+      "performanceConsistency": 0,
+      "sourceNote": ""
+    }
+  ]
+}
+""".formatted(weightClassName, SCORING_RUBRIC.formatted(weightClassName));
+    }
+}
