@@ -34,4 +34,17 @@ public class PerfectBoxerController {
         PerfectBoxerResponse response = generationService.generateForWeightClass(weightClassId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @PostMapping("/regenerate/weight-class/{weightClassId}")
+    public ResponseEntity<PerfectBoxerResponse> regenerateByWeightClass(@PathVariable Integer weightClassId) {
+        PerfectBoxerResponse response = generationService.regenerateForWeightClass(weightClassId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/regenerate/batch/{batchId}")
+    public ResponseEntity<PerfectBoxerResponse> regenerateByBatch(@PathVariable Integer batchId) {
+        PerfectBoxerResponse response = generationService.regenerateForBatch(batchId);
+        return ResponseEntity.ok(response);
+    }
+
 }

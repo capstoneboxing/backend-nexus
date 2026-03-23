@@ -24,6 +24,10 @@ app:
       secret: ${JWT_SECRET}
       expiration-ms: 86400000
 
+admin:
+  default:
+    password: ${ADMIN_DEFAULT_PASSWORD}
+
 
 logging:
   level:

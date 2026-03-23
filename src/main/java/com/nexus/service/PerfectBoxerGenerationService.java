@@ -75,7 +75,51 @@ public class PerfectBoxerGenerationService {
         );
 
         PerfectBoxer savedPerfectBoxer = perfectBoxerRepository.save(perfectBoxer);
-        System.out.println("Created Admin: " + savedPerfectBoxer);
+        System.out.println("Created PerfectBoxer: " + savedPerfectBoxer);
+        return mapToResponse(savedPerfectBoxer);
+    }
+
+    @Transactional
+    public PerfectBoxerResponse regenerateForWeightClass(Integer weightClassId) {
+        PerfectBoxerGenerationBatch activeBatch = batchRepository.findByWeightClassIdAndIsActiveTrue(weightClassId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No active batch found for weight class: " + weightClassId
+                ));
+
+        return regenerateForBatch(activeBatch.getBatchId());
+    }
+
+    @Transactional
+    public PerfectBoxerResponse regenerateForBatch(Integer batchId) {
+        PerfectBoxerGenerationBatch batch = batchRepository.findById(batchId)
+                .orElseThrow(() -> new IllegalArgumentException("Batch not found: " + batchId));
+
+        if (!Boolean.TRUE.equals(batch.getIsActive())) {
+            throw new IllegalArgumentException("Batch is not active: " + batchId);
+        }
+
+        List<AllTimeRankedBoxer> rankedBoxers =
+                rankedBoxerRepository.findByBatchIdOrderByRankingPositionAsc(batchId);
+
+        if (rankedBoxers.isEmpty()) {
+            throw new IllegalArgumentException("No ranked boxers found for batch: " + batchId);
+        }
+
+        Integer weightClassId = rankedBoxers.getFirst().getWeightClassId();
+
+        PerfectBoxer recalculated = perfectBoxerCalculator.buildFromRankedBoxers(
+                batchId,
+                weightClassId,
+                rankedBoxers
+        );
+
+        PerfectBoxer savedPerfectBoxer = perfectBoxerRepository.findByBatchId(batchId)
+                .map(existing -> {
+                    recalculated.setPerfectBoxerId(existing.getPerfectBoxerId());
+                    return perfectBoxerRepository.save(recalculated);
+                })
+                .orElseGet(() -> perfectBoxerRepository.save(recalculated));
+
         return mapToResponse(savedPerfectBoxer);
     }
 
