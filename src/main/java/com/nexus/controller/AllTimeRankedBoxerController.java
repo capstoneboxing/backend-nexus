@@ -2,7 +2,11 @@ package com.nexus.controller;
 
 import com.nexus.dto.allTimeRankedBoxer.AllTimeRankedBoxerResponse;
 import com.nexus.dto.allTimeRankedBoxer.AllTimeRankedBoxerUpdateRequest;
+import com.nexus.dto.allTimeRankedBoxer.BoxerProfileLookupFailureResponse;
+import com.nexus.dto.allTimeRankedBoxer.GenerateBoxerProfileRequest;
+import com.nexus.exception.BoxerProfileLookupException;
 import com.nexus.service.AllTimeRankedBoxerService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,7 +49,7 @@ public class AllTimeRankedBoxerController {
     @PutMapping("/{id}")
     public ResponseEntity<AllTimeRankedBoxerResponse> update(
             @PathVariable Integer id,
-            @RequestBody AllTimeRankedBoxerUpdateRequest request
+            @Valid @RequestBody AllTimeRankedBoxerUpdateRequest request
     ) {
         return ResponseEntity.ok(rankedBoxerService.update(id, request));
     }
@@ -54,5 +58,25 @@ public class AllTimeRankedBoxerController {
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         rankedBoxerService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/generate-profile")
+    public ResponseEntity<?> generateProfile(@Valid @RequestBody GenerateBoxerProfileRequest request) {
+        try {
+            return ResponseEntity.ok(
+                    rankedBoxerService.generateBoxerProfile(
+                            request.boxerName(),
+                            request.weightClassId()
+                    )
+            );
+        } catch (BoxerProfileLookupException ex) {
+            return ResponseEntity.status(404).body(
+                    new BoxerProfileLookupFailureResponse(
+                            false,
+                            ex.getConfidence(),
+                            ex.getMessage()
+                    )
+            );
+        }
     }
 }

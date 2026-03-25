@@ -1,103 +1,52 @@
 package com.nexus.dto.allTimeRankedBoxer;
 
-import jakarta.validation.constraints.*;
+public record GeneratedBoxerProfileResponse(
+        boolean boxerFound,
+        double confidence,
+        String matchReason,
+        Integer weightClassId,
+        String boxerName,
 
-public record AllTimeRankedBoxerUpdateRequest(
-
-        @Min(0) @Max(999)
+        // Physical
         Double heightCm,
-
-        @Min(0) @Max(300)
         Double reachCm,
-
-        @Min(1) @Max(10)
         Double weightClassAlignment,
-
-        @Min(1) @Max(10)
         Double handSpeed,
-
-        @Min(1) @Max(10)
         Double footSpeed,
-
-        @Min(1) @Max(10)
         Double strength,
-
-        @Min(1) @Max(10)
         Double endurance,
-
-        @Min(1) @Max(10)
         Double reactionTime,
 
-        @Min(1) @Max(10)
+        // Technical
         Double punchAccuracy,
-
-        @Min(1) @Max(10)
         Double punchVariety,
-
-        @Min(1) @Max(10)
         Double defensiveGuardEfficiency,
-
-        @Min(1) @Max(10)
         Double headMovement,
-
-        @Min(1) @Max(10)
         Double footworkTechnique,
-
-        @Min(1) @Max(10)
         Double counterpunchingAbility,
-
-        @Min(1) @Max(10)
         Double combinationEfficiency,
 
-        @Min(1) @Max(10)
+        // Tactical
         Double ringIq,
-
-        @Min(1) @Max(10)
         Double adaptabilityMidFight,
-
-        @Min(1) @Max(10)
         Double distanceControl,
-
-        @Min(1) @Max(10)
         Double tempoControl,
-
-        @Min(1) @Max(10)
         Double opponentPatternRecognition,
-
-        @Min(1) @Max(10)
         Double fightPlanningDiscipline,
 
-        @Min(1) @Max(10)
+        // Psychological
         Double composureUnderPressure,
-
-        @Min(1) @Max(10)
         Double aggressionControl,
-
-        @Min(1) @Max(10)
         Double mentalToughness,
-
-        @Min(1) @Max(10)
         Double focusConsistency,
-
-        @Min(1) @Max(10)
         Double resilienceAfterKnockdown,
 
-        @DecimalMin("0.0") @DecimalMax("1.0")
+        // Performance
         Double winRatio,
-
-        @DecimalMin("0.0") @DecimalMax("1.0")
         Double knockoutRatio,
-
-        @Min(1) @Max(10)
         Double titleFightExperience,
-
-        @Min(1) @Max(10)
         Double strengthOfOpposition,
-
-        @Min(1) @Max(10)
         Double recentFightActivity,
-
-        @Min(1) @Max(10)
         Double performanceConsistency,
 
         String sourceNote

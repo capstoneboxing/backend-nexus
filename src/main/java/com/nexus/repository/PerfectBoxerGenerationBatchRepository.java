@@ -16,4 +16,36 @@ public interface PerfectBoxerGenerationBatchRepository extends ListCrudRepositor
     @Modifying
     @Query("UPDATE perfect_boxer_generation_batch SET is_active = FALSE WHERE weight_class_id = :weightClassId AND is_active = TRUE")
     void deactivateActiveBatchByWeightClassId(Integer weightClassId);
+
+    @Modifying
+    @Query("""
+        UPDATE perfect_boxer_generation_batch
+        SET status = :status, error_message = :errorMessage
+        WHERE batch_id = :batchId
+        """)
+    void updateStatus(Integer batchId, String status, String errorMessage);
+
+    @Modifying
+    @Query("UPDATE perfect_boxer_generation_batch SET is_active = FALSE WHERE batch_id = :batchId")
+    void deactivateBatch(Integer batchId);
+
+    @Modifying
+    @Query("""
+UPDATE perfect_boxer_generation_batch
+SET status = :status,
+    error_message = :errorMessage,
+    is_active = :isActive
+WHERE batch_id = :batchId
+""")
+    void updateStatusAndIsActive(Integer batchId, String status, String errorMessage, Boolean isActive);
+
+    @Modifying
+    @Query("""
+    UPDATE perfect_boxer_generation_batch
+    SET is_active = FALSE
+    WHERE weight_class_id = :weightClassId
+      AND batch_id <> :batchId
+      AND is_active = TRUE
+""")
+    void deactivateOtherActiveBatchesByWeightClassId(Integer weightClassId, Integer batchId);
 }

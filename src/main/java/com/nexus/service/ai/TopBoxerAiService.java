@@ -1,71 +1,90 @@
 package com.nexus.service.ai;
 
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.nexus.dto.TopBoxerAiResponse;
+import com.nexus.dto.ai.TopBoxerAiResponse;
+import com.nexus.util.AppUtils;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TopBoxerAiService {
+
     private static final boolean USE_FULL_RUBRIC = false;
+
+    private static final String BASE_INSTRUCTIONS = """
+You are a boxing analytics evaluator.
+
+Return ONLY valid JSON.
+Do not return markdown.
+Do not return explanations outside the JSON.
+Do not wrap the JSON in code fences.
+Do not invent extra fields.
+Field names must match the JSON schema exactly.
+""";
 
     private static final String SHORT_RUBRIC = """
 Core rules:
-- Return exactly 10 boxers ranked 1–10.
-- heightCm and reachCm are real measurements (cm).
-- heightCm and reachCm should be based on commonly reported real-world values (e.g., BoxRec, Wikipedia, ESPN).
-- winRatio and knockoutRatio are decimals (0.0–1.0).
-- winRatio and knockoutRatio should reflect realistic career records.
-- All other attributes are scored 1.0–10.0.
-
-Scoring scale (apply to all attributes):
-1–2 = poor
-3–4 = below average
-5 = average pro
-6 = above average
-7 = strong
-8 = elite
-9 = world-class
-10 = all-time great
-
-Guidelines:
+- Return exactly 10 boxers ranked 1 to 10.
 - Score relative to the %s division.
 - Be consistent across all 10 fighters.
 - Avoid giving too many 10s.
 - Use realistic boxing knowledge.
 
-Attribute interpretation:
-- Physical = athletic ability (speed, strength, endurance)
-- Technical = skill execution (accuracy, defense, combinations)
+Measurement rules:
+- heightCm and reachCm must be raw measurements in centimeters.
+- Prefer commonly reported open/public sources such as BoxRec, Wikipedia, ESPN, The Ring, and BoxingScene.
+- If exact measurements are uncertain, use the best-known commonly reported estimate.
+
+Record rules:
+- winRatio and knockoutRatio must be raw decimal values from 0.0 to 1.0.
+- Prefer values consistent with commonly reported professional records from open/public sources.
+- winRatio = wins / total fights.
+- knockoutRatio = knockout wins / total wins.
+- If exact record details are uncertain, use the best-known commonly reported estimate.
+
+Scoring scale for all other attributes:
+- 1 to 2 = poor
+- 3 to 4 = below average
+- 5 = average professional level
+- 6 = above average
+- 7 = strong
+- 8 = elite
+- 9 = exceptional / world-class
+- 10 = near-ideal for the division / all-time level
+
+Attribute groups:
+- Physical = athletic ability
+- Technical = skill execution
 - Tactical = ring IQ and strategy
 - Psychological = composure, toughness, focus
 - Experience = quality of opposition and career level
 
-Ratios:
-- winRatio = wins / total fights
-- knockoutRatio = KO wins / total wins or total fights (be consistent)
-
 sourceNote:
-- Briefly mention reasoning (e.g., resume, skillset, opposition level).
+- Briefly mention ranking and scoring basis.
 """;
 
     private static final String FULL_RUBRIC = """
-Core instructions:
+Core rules:
 - Return exactly 10 boxers.
 - rankingPosition must be 1 through 10.
 - Use historically defensible all-time rankings for this weight class.
-- heightCm and reachCm must be raw measurements in cm, based on known real-world measurements where available.
-- heightCm and reachCm should be based on commonly reported real-world values (e.g., BoxRec, Wikipedia, ESPN).
-- winRatio and knockoutRatio must be raw decimal values from 0.0 to 1.0.
-- winRatio and knockoutRatio should reflect realistic career records.
-- All other scored attributes must be numeric values from 1.0 to 10.0.
+- Score each boxer relative to the standards of the %s division.
+- Be internally consistent across all 10 fighters.
+- Avoid giving too many 10.0 scores unless truly justified.
 - Use decimals if needed, for example 7.5.
-- sourceNote must briefly justify both selection and scoring basis in 1 to 3 sentences.
+
+Measurement rules:
+- heightCm and reachCm are raw physical measurements in centimeters, not rubric scores.
+- Prefer commonly reported open/public sources such as BoxRec, Wikipedia, ESPN, The Ring, and BoxingScene.
 - If exact measurements are uncertain, use the best-known commonly reported estimate.
-- Do not invent extra fields.
-- Field names must match the JSON schema exactly.
+
+Record rules:
+- winRatio and knockoutRatio are raw decimal ratios from 0.0 to 1.0, not rubric scores.
+- Prefer values consistent with commonly reported professional records from open/public sources.
+- winRatio = wins / total fights.
+- knockoutRatio = knockout wins / total wins.
+- If exact record details are uncertain, use the best-known commonly reported estimate.
 
 Scoring standard:
-Use the following universal meaning across all scored 1-10 attributes unless a specific attribute rubric overrides it:
 - 1 to 2 = very poor
 - 3 to 4 = below average
 - 5 = average professional level
@@ -76,12 +95,7 @@ Use the following universal meaning across all scored 1-10 attributes unless a s
 - 10 = near-ideal for the division / all-time level
 
 Important scoring rules:
-- heightCm and reachCm are NOT rubric scores. They are raw physical measurements in centimeters.
-- winRatio and knockoutRatio are NOT rubric scores. They are raw decimal ratios from 0.0 to 1.0.
-- titleFightExperience, strengthOfOpposition, recentFightActivity, and performanceConsistency ARE scored from 1.0 to 10.0 using the rubric below.
-- Score each boxer relative to the standards of the %s division, not across all divisions equally.
-- Be internally consistent across all 10 fighters.
-- Avoid giving too many 10.0 scores unless truly justified by all-time greatness in that specific attribute.
+- titleFightExperience, strengthOfOpposition, recentFightActivity, and performanceConsistency are scored from 1.0 to 10.0 using the rubric below.
 
 Physical attribute rubrics:
 weightClassAlignment:
@@ -312,65 +326,11 @@ performanceConsistency:
 - 8 = elite reliability
 - 10 = exceptionally consistent high-level performance
 
-For winRatio and knockoutRatio:
-- winRatio = wins / total fights
-- knockoutRatio = knockout wins / total wins OR knockout wins / total fights
-- choose one reasonable standard and apply it consistently across all 10 boxers
-- mention briefly in sourceNote which standard you used if needed
+sourceNote:
+- Briefly justify both selection and scoring basis in 1 to 3 sentences.
 """;
 
-    private static final String SCORING_RUBRIC = USE_FULL_RUBRIC
-            ? FULL_RUBRIC
-            : SHORT_RUBRIC;
-
-    private final AiService aiService;
-    private final JsonMapper jsonMapper;
-
-    public TopBoxerAiService(AiService aiService, JsonMapper jsonMapper) {
-        this.aiService = aiService;
-        this.jsonMapper = jsonMapper;
-    }
-
-    private String extractJson(String response) {
-        int start = response.indexOf("{");
-        int end = response.lastIndexOf("}");
-
-        if (start == -1 || end == -1 || end < start) {
-            throw new RuntimeException("No valid JSON object found in AI response: " + response);
-        }
-
-        return response.substring(start, end + 1);
-    }
-
-    public TopBoxerAiResponse getTop10ForWeightClass(String weightClassName) {
-        String prompt = buildPrompt(weightClassName);
-        String response = aiService.chat(prompt);
-
-        try {
-            String json = extractJson(response);
-            System.out.println(json);
-            return jsonMapper.readValue(json, TopBoxerAiResponse.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to parse AI response: " + response, e);
-        }
-    }
-
-    private String buildPrompt(String weightClassName) {
-        return """
-You are a boxing analytics evaluator.
-
-Return ONLY valid JSON.
-Do not return markdown.
-Do not return explanations outside the JSON.
-Do not wrap the JSON in code fences.
-
-Task:
-Select the top 10 all-time boxers in the %s division.
-For each boxer, return fields that match the boxing analytics schema exactly.
-
-%s
-
-JSON format:
+    private static final String JSON_SCHEMA = """
 {
   "boxers": [
     {
@@ -412,6 +372,47 @@ JSON format:
     }
   ]
 }
-""".formatted(weightClassName, SCORING_RUBRIC.formatted(weightClassName));
+""";
+
+    private static final String SCORING_RUBRIC = USE_FULL_RUBRIC ? FULL_RUBRIC : SHORT_RUBRIC;
+
+    private final AiService aiService;
+    private final JsonMapper jsonMapper;
+
+    public TopBoxerAiService(AiService aiService, JsonMapper jsonMapper) {
+        this.aiService = aiService;
+        this.jsonMapper = jsonMapper;
+    }
+
+    public TopBoxerAiResponse getTop10ForWeightClass(String weightClassName) {
+        String prompt = buildPrompt(weightClassName);
+        String response = aiService.chat(prompt);
+
+        try {
+            String json = AppUtils.extractJson(response);
+            return jsonMapper.readValue(json, TopBoxerAiResponse.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse AI response: " + response, e);
+        }
+    }
+
+    private String buildPrompt(String weightClassName) {
+        return """
+%s
+
+Task:
+Select the top 10 all-time boxers in the %s division.
+For each boxer, return fields that match the boxing analytics schema exactly.
+
+%s
+
+JSON format:
+%s
+""".formatted(
+                BASE_INSTRUCTIONS,
+                weightClassName,
+                SCORING_RUBRIC.formatted(weightClassName),
+                JSON_SCHEMA
+        );
     }
 }

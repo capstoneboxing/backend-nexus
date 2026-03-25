@@ -28,4 +28,10 @@ public class PerfectBoxerGenerationBatch {
 
     @Column("is_active")
     private Boolean isActive;
+
+    @Column("status")
+    private String status;
+
+    @Column("error_message")
+    private String errorMessage;
 }

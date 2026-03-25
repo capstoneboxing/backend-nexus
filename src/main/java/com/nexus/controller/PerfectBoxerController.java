@@ -1,6 +1,7 @@
 package com.nexus.controller;
 
-import com.nexus.dto.admin.AdminResponse;
+import com.nexus.dto.perfectboxer.PerfectBoxerBatchStatusResponse;
+import com.nexus.dto.perfectboxer.PerfectBoxerGenerationStartedResponse;
 import com.nexus.dto.perfectboxer.PerfectBoxerResponse;
 import com.nexus.model.PerfectBoxer;
 import com.nexus.service.PerfectBoxerGenerationService;
@@ -30,9 +31,14 @@ public class PerfectBoxerController {
     }
 
     @PostMapping("/generate/{weightClassId}")
-    public ResponseEntity<PerfectBoxerResponse> generate(@PathVariable Integer weightClassId) {
-        PerfectBoxerResponse response = generationService.generateForWeightClass(weightClassId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<PerfectBoxerGenerationStartedResponse> generate(@PathVariable Integer weightClassId) {
+        PerfectBoxerGenerationStartedResponse response = generationService.generateForWeightClassAsync(weightClassId);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+    }
+
+    @GetMapping("/batches/{batchId}/status")
+    public ResponseEntity<PerfectBoxerBatchStatusResponse> getBatchStatus(@PathVariable Integer batchId) {
+        return ResponseEntity.ok(generationService.getBatchStatus(batchId));
     }
 
     @PostMapping("/regenerate/weight-class/{weightClassId}")

@@ -1,4 +1,4 @@
-package com.nexus.dto;
+package com.nexus.dto.ai;
 
 import lombok.*;
 
