@@ -2,10 +2,16 @@ package com.nexus.service;
 
 import com.nexus.dto.allTimeRankedBoxer.AllTimeRankedBoxerResponse;
 import com.nexus.dto.allTimeRankedBoxer.AllTimeRankedBoxerUpdateRequest;
+import com.nexus.dto.allTimeRankedBoxer.GeneratedBoxerProfileResponse;
+import com.nexus.exception.BoxerProfileLookupException;
 import com.nexus.model.AllTimeRankedBoxer;
 import com.nexus.model.PerfectBoxerGenerationBatch;
+import com.nexus.model.WeightClass;
 import com.nexus.repository.AllTimeRankedBoxerRepository;
 import com.nexus.repository.PerfectBoxerGenerationBatchRepository;
+import com.nexus.repository.WeightClassRepository;
+import com.nexus.service.ai.SingleBoxerAiService;
+import com.nexus.util.AppUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,16 +19,23 @@ import java.util.List;
 
 @Service
 public class AllTimeRankedBoxerService {
+    private static final double MIN_BOXER_PROFILE_CONFIDENCE = 0.75;
 
     private final AllTimeRankedBoxerRepository rankedBoxerRepository;
     private final PerfectBoxerGenerationBatchRepository batchRepository;
+    private final WeightClassRepository weightClassRepository;
+    private final SingleBoxerAiService singleBoxerAiService;
 
     public AllTimeRankedBoxerService(
             AllTimeRankedBoxerRepository rankedBoxerRepository,
-            PerfectBoxerGenerationBatchRepository batchRepository
+            PerfectBoxerGenerationBatchRepository batchRepository,
+            WeightClassRepository weightClassRepository,
+            SingleBoxerAiService singleBoxerAiService
     ) {
         this.rankedBoxerRepository = rankedBoxerRepository;
         this.batchRepository = batchRepository;
+        this.weightClassRepository = weightClassRepository;
+        this.singleBoxerAiService = singleBoxerAiService;
     }
 
     public List<AllTimeRankedBoxerResponse> findAll() {
@@ -100,8 +113,8 @@ public class AllTimeRankedBoxerService {
         if (request.focusConsistency() != null) boxer.setFocusConsistency(request.focusConsistency());
         if (request.resilienceAfterKnockdown() != null) boxer.setResilienceAfterKnockdown(request.resilienceAfterKnockdown());
 
-        if (request.winRatio() != null) boxer.setWinRatio(round2(request.winRatio()));
-        if (request.knockoutRatio() != null) boxer.setKnockoutRatio(round2(request.knockoutRatio()));
+        if (request.winRatio() != null) boxer.setWinRatio(AppUtils.roundTo2DecimalPlaces(request.winRatio()));
+        if (request.knockoutRatio() != null) boxer.setKnockoutRatio(AppUtils.roundTo2DecimalPlaces(request.knockoutRatio()));
         if (request.titleFightExperience() != null) boxer.setTitleFightExperience(request.titleFightExperience());
         if (request.strengthOfOpposition() != null) boxer.setStrengthOfOpposition(request.strengthOfOpposition());
         if (request.recentFightActivity() != null) boxer.setRecentFightActivity(request.recentFightActivity());
@@ -120,8 +133,67 @@ public class AllTimeRankedBoxerService {
         rankedBoxerRepository.deleteById(id);
     }
 
-    private double round2(double value) {
-        return Math.round(value * 100.0) / 100.0;
+    public GeneratedBoxerProfileResponse generateBoxerProfile(String boxerName, Integer weightClassId) {
+        WeightClass weightClass = weightClassRepository.findById(weightClassId)
+                .orElseThrow(() -> new IllegalArgumentException("Weight class not found: " + weightClassId));
+
+        var aiResponse = singleBoxerAiService.getBoxerProfile(boxerName, weightClass.getClassName());
+
+        boolean boxerFound = Boolean.TRUE.equals(aiResponse.getBoxerFound());
+        double confidence = aiResponse.getConfidence() != null ? aiResponse.getConfidence() : 0.0;
+        String matchReason = aiResponse.getMatchReason();
+
+        if (!boxerFound || confidence < MIN_BOXER_PROFILE_CONFIDENCE || aiResponse.getBoxer() == null) {
+            throw new BoxerProfileLookupException(
+                    "AI could not confidently identify boxer '" + boxerName +
+                            "' for weight class '" + weightClass.getClassName() +
+                            "'. Reason: " + matchReason,
+                    confidence
+            );
+        }
+
+        var boxer = aiResponse.getBoxer();
+
+        return new GeneratedBoxerProfileResponse(
+                true,
+                confidence,
+                matchReason,
+                weightClassId,
+                boxer.getBoxerName(),
+                boxer.getHeightCm(),
+                boxer.getReachCm(),
+                boxer.getWeightClassAlignment(),
+                boxer.getHandSpeed(),
+                boxer.getFootSpeed(),
+                boxer.getStrength(),
+                boxer.getEndurance(),
+                boxer.getReactionTime(),
+                boxer.getPunchAccuracy(),
+                boxer.getPunchVariety(),
+                boxer.getDefensiveGuardEfficiency(),
+                boxer.getHeadMovement(),
+                boxer.getFootworkTechnique(),
+                boxer.getCounterpunchingAbility(),
+                boxer.getCombinationEfficiency(),
+                boxer.getRingIq(),
+                boxer.getAdaptabilityMidFight(),
+                boxer.getDistanceControl(),
+                boxer.getTempoControl(),
+                boxer.getOpponentPatternRecognition(),
+                boxer.getFightPlanningDiscipline(),
+                boxer.getComposureUnderPressure(),
+                boxer.getAggressionControl(),
+                boxer.getMentalToughness(),
+                boxer.getFocusConsistency(),
+                boxer.getResilienceAfterKnockdown(),
+                AppUtils.roundTo2DecimalPlaces(boxer.getWinRatio()),
+                AppUtils.roundTo2DecimalPlaces(boxer.getKnockoutRatio()),
+                boxer.getTitleFightExperience(),
+                boxer.getStrengthOfOpposition(),
+                boxer.getRecentFightActivity(),
+                boxer.getPerformanceConsistency(),
+                boxer.getSourceNote()
+        );
     }
 
     private AllTimeRankedBoxerResponse mapToResponse(AllTimeRankedBoxer boxer) {

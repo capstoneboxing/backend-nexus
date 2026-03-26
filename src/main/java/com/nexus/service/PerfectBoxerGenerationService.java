@@ -1,14 +1,17 @@
 package com.nexus.service;
 
-import com.nexus.dto.TopBoxerAiProfile;
-import com.nexus.dto.TopBoxerAiResponse;
-import com.nexus.dto.perfectboxer.PerfectBoxerResponse;
-import com.nexus.model.*;
+import com.nexus.dto.ai.TopBoxerAiProfile;
+import com.nexus.dto.ai.TopBoxerAiResponse;
+import com.nexus.model.AllTimeRankedBoxer;
+import com.nexus.model.PerfectBoxer;
+import com.nexus.model.PerfectBoxerGenerationBatch;
+import com.nexus.model.WeightClass;
 import com.nexus.repository.AllTimeRankedBoxerRepository;
 import com.nexus.repository.PerfectBoxerGenerationBatchRepository;
 import com.nexus.repository.PerfectBoxerRepository;
 import com.nexus.repository.WeightClassRepository;
 import com.nexus.service.ai.TopBoxerAiService;
+import com.nexus.util.AppUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,88 +47,38 @@ public class PerfectBoxerGenerationService {
     }
 
     @Transactional
-    public PerfectBoxerResponse generateForWeightClass(Integer weightClassId) {
-        WeightClass weightClass = weightClassRepository.findById(weightClassId)
-                .orElseThrow(() -> new IllegalArgumentException("Weight class not found: " + weightClassId));
+    public void runGeneration(Integer batchId) {
+        PerfectBoxerGenerationBatch batch = batchRepository.findById(batchId)
+                .orElseThrow(() -> new IllegalArgumentException("Batch not found: " + batchId));
 
-        batchRepository.deactivateActiveBatchByWeightClassId(weightClassId);
+        WeightClass weightClass = weightClassRepository.findById(batch.getWeightClassId())
+                .orElseThrow(() -> new IllegalArgumentException("Weight class not found: " + batch.getWeightClassId()));
 
-        PerfectBoxerGenerationBatch batch = batchRepository.save(
-                PerfectBoxerGenerationBatch.builder()
-                        .weightClassId(weightClassId)
-                        .createdAt(OffsetDateTime.now())
-                        .isActive(true)
-                        .build()
-        );
+        Integer amount = batch.getAmount();
 
-        TopBoxerAiResponse aiResponse = topBoxerAiService.getTop10ForWeightClass(weightClass.getClassName());
+        TopBoxerAiResponse aiResponse =
+                topBoxerAiService.getTopBoxersForWeightClass(weightClass.getClassName(), amount);
 
-        validateAiResponse(aiResponse);
+        validateAiResponse(aiResponse, amount);
 
         List<AllTimeRankedBoxer> rankedBoxers = mapAndSaveRankedBoxers(
-                batch.getBatchId(),
-                weightClassId,
+                batchId,
+                batch.getWeightClassId(),
                 aiResponse.getBoxers()
         );
 
         PerfectBoxer perfectBoxer = perfectBoxerCalculator.buildFromRankedBoxers(
-                batch.getBatchId(),
-                weightClassId,
-                rankedBoxers
-        );
-
-        PerfectBoxer savedPerfectBoxer = perfectBoxerRepository.save(perfectBoxer);
-        System.out.println("Created PerfectBoxer: " + savedPerfectBoxer);
-        return mapToResponse(savedPerfectBoxer);
-    }
-
-    @Transactional
-    public PerfectBoxerResponse regenerateForWeightClass(Integer weightClassId) {
-        PerfectBoxerGenerationBatch activeBatch = batchRepository.findByWeightClassIdAndIsActiveTrue(weightClassId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "No active batch found for weight class: " + weightClassId
-                ));
-
-        return regenerateForBatch(activeBatch.getBatchId());
-    }
-
-    @Transactional
-    public PerfectBoxerResponse regenerateForBatch(Integer batchId) {
-        PerfectBoxerGenerationBatch batch = batchRepository.findById(batchId)
-                .orElseThrow(() -> new IllegalArgumentException("Batch not found: " + batchId));
-
-        if (!Boolean.TRUE.equals(batch.getIsActive())) {
-            throw new IllegalArgumentException("Batch is not active: " + batchId);
-        }
-
-        List<AllTimeRankedBoxer> rankedBoxers =
-                rankedBoxerRepository.findByBatchIdOrderByRankingPositionAsc(batchId);
-
-        if (rankedBoxers.isEmpty()) {
-            throw new IllegalArgumentException("No ranked boxers found for batch: " + batchId);
-        }
-
-        Integer weightClassId = rankedBoxers.getFirst().getWeightClassId();
-
-        PerfectBoxer recalculated = perfectBoxerCalculator.buildFromRankedBoxers(
                 batchId,
-                weightClassId,
+                batch.getWeightClassId(),
                 rankedBoxers
         );
 
-        PerfectBoxer savedPerfectBoxer = perfectBoxerRepository.findByBatchId(batchId)
-                .map(existing -> {
-                    recalculated.setPerfectBoxerId(existing.getPerfectBoxerId());
-                    return perfectBoxerRepository.save(recalculated);
-                })
-                .orElseGet(() -> perfectBoxerRepository.save(recalculated));
-
-        return mapToResponse(savedPerfectBoxer);
+        perfectBoxerRepository.save(perfectBoxer);
     }
 
-    private void validateAiResponse(TopBoxerAiResponse aiResponse) {
-        if (aiResponse == null || aiResponse.getBoxers() == null || aiResponse.getBoxers().size() != 10) {
-            throw new IllegalArgumentException("AI must return exactly 10 boxers.");
+    private void validateAiResponse(TopBoxerAiResponse aiResponse, Integer amount) {
+        if (aiResponse == null || aiResponse.getBoxers() == null || aiResponse.getBoxers().size() != amount) {
+            throw new IllegalArgumentException("AI must return exactly " + amount + " boxers.");
         }
 
         List<Integer> rankings = aiResponse.getBoxers().stream()
@@ -133,9 +86,9 @@ public class PerfectBoxerGenerationService {
                 .sorted()
                 .toList();
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < amount; i++) {
             if (!rankings.get(i).equals(i + 1)) {
-                throw new IllegalArgumentException("AI rankings must be exactly 1 through 10.");
+                throw new IllegalArgumentException("AI rankings must be exactly 1 through " + amount + ".");
             }
         }
     }
@@ -181,8 +134,8 @@ public class PerfectBoxerGenerationService {
                             .mentalToughness(profile.getMentalToughness())
                             .focusConsistency(profile.getFocusConsistency())
                             .resilienceAfterKnockdown(profile.getResilienceAfterKnockdown())
-                            .winRatio(roundTo2DecimalPlaces(profile.getWinRatio()))
-                            .knockoutRatio(roundTo2DecimalPlaces(profile.getKnockoutRatio()))
+                            .winRatio(AppUtils.roundTo2DecimalPlaces(profile.getWinRatio()))
+                            .knockoutRatio(AppUtils.roundTo2DecimalPlaces(profile.getKnockoutRatio()))
                             .titleFightExperience(profile.getTitleFightExperience())
                             .strengthOfOpposition(profile.getStrengthOfOpposition())
                             .recentFightActivity(profile.getRecentFightActivity())
@@ -195,18 +148,5 @@ public class PerfectBoxerGenerationService {
                 });
 
         return saved;
-    }
-
-    private double roundTo2DecimalPlaces(double value) {
-        return Math.round(value * 100.0) / 100.0;
-    }
-
-    private PerfectBoxerResponse mapToResponse(PerfectBoxer perfectBoxer) {
-        return new PerfectBoxerResponse(
-                perfectBoxer.getPerfectBoxerId(),
-                perfectBoxer.getBatchId(),
-                perfectBoxer.getWeightClassId(),
-                perfectBoxer.getCreatedAt()
-        );
     }
 }

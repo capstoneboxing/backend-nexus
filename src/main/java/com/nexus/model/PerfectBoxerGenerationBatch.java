@@ -22,10 +22,19 @@ public class PerfectBoxerGenerationBatch {
     @Column("weight_class_id")
     private Integer weightClassId;
 
-    @ReadOnlyProperty
-    @Column("created_at")
-    private OffsetDateTime createdAt;
+    @Column("amount")
+    private Integer amount;
+
+    @Column("status")
+    private String status;
 
     @Column("is_active")
     private Boolean isActive;
+
+    @Column("error_message")
+    private String errorMessage;
+
+    @ReadOnlyProperty
+    @Column("created_at")
+    private OffsetDateTime createdAt;
 }
