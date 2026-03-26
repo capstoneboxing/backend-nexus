@@ -37,7 +37,7 @@ SET status = :status,
     is_active = :isActive
 WHERE batch_id = :batchId
 """)
-    void updateStatusAndIsActive(Integer batchId, String status, String errorMessage, Boolean isActive);
+    void updateStatusAndIsActive(Integer batchId, String status, Boolean isActive, String errorMessage);
 
     @Modifying
     @Query("""

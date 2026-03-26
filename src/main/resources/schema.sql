@@ -25,10 +25,11 @@ CREATE TABLE IF NOT EXISTS weight_class (
 CREATE TABLE IF NOT EXISTS perfect_boxer_generation_batch (
                                                               batch_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                                                               weight_class_id INT NOT NULL REFERENCES weight_class(weight_class_id) ON DELETE CASCADE,
-                                                              created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                                                              is_active BOOLEAN NOT NULL DEFAULT TRUE,
+                                                              amount INTEGER NOT NULL DEFAULT 10,
                                                               status VARCHAR(30) NOT NULL DEFAULT 'PENDING',
+                                                              is_active BOOLEAN NOT NULL DEFAULT TRUE,
                                                               error_message TEXT,
+                                                              created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                                                               CONSTRAINT chk_batch_status CHECK (status IN ('PENDING', 'PROCESSING', 'COMPLETED', 'FAILED'))
 );
 

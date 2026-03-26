@@ -23,7 +23,7 @@ Field names must match the JSON schema exactly.
 Scoring rules:
 - Return exactly one boxer profile.
 - Score relative to the %s division.
-- Be realistic and conservative.
+- Use realistic and conservative boxing judgment when assigning scores.
 
 Measurement rules:
 - heightCm and reachCm must be raw measurements in centimeters.
@@ -46,6 +46,13 @@ Scoring scale for all other attributes:
 - 8 = elite
 - 9 = world-class
 - 10 = all-time great
+
+Attribute groups:
+- Physical = size, athletic traits, speed, strength, endurance, and reactions
+- Technical = execution of punches, defense, footwork, counters, and combinations
+- Tactical = decision-making, adjustment, distance control, tempo control, opponent reading, and game-plan execution
+- Psychological = composure, aggression control, toughness, focus, and recovery from adversity
+- Performance = record efficiency, title experience, opposition quality, activity level, and consistency
 
 Confidence rules:
 - confidence must be from 0.0 to 1.0.
@@ -139,7 +146,6 @@ Decision rules:
 
 Profile rules:
 - boxerName must match the identified boxer.
-- Use commonly reported open/public boxing sources where possible for measurements and record-based values.
 - Use realistic boxing knowledge for subjective scoring.
 - sourceNote should briefly mention the basis of the profile, including the kind of public/open sources relied on where relevant.
 

@@ -8,6 +8,7 @@ import lombok.Data;
 public class PerfectBoxerGenerationStartedResponse {
     private Integer batchId;
     private Integer weightClassId;
+    private Integer amount;
     private String status;
     private String message;
 }

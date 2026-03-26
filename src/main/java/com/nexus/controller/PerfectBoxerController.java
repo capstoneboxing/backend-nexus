@@ -1,10 +1,12 @@
 package com.nexus.controller;
 
 import com.nexus.dto.perfectboxer.PerfectBoxerBatchStatusResponse;
+import com.nexus.dto.perfectboxer.PerfectBoxerGenerationRequest;
 import com.nexus.dto.perfectboxer.PerfectBoxerGenerationStartedResponse;
 import com.nexus.dto.perfectboxer.PerfectBoxerResponse;
 import com.nexus.model.PerfectBoxer;
 import com.nexus.service.PerfectBoxerService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,9 +27,13 @@ public class PerfectBoxerController {
         return ResponseEntity.ok(perfectBoxerService.getByWeightClassId(weightClassId));
     }
 
-    @PostMapping("/generate/{weightClassId}")
-    public ResponseEntity<PerfectBoxerGenerationStartedResponse> generate(@PathVariable Integer weightClassId) {
-        PerfectBoxerGenerationStartedResponse response = perfectBoxerService.generateForWeightClassAsync(weightClassId);
+    @PostMapping("/generate")
+    public ResponseEntity<PerfectBoxerGenerationStartedResponse> generate(
+            @Valid @RequestBody PerfectBoxerGenerationRequest request
+    ) {
+        PerfectBoxerGenerationStartedResponse response =
+                perfectBoxerService.generateForWeightClassAsync(request.weightClassId(), request.amount());
+
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 

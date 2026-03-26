@@ -27,16 +27,16 @@ public class PerfectBoxerAsyncService {
 
             Integer weightClassId = batch.getWeightClassId();
 
-            batchRepository.updateStatusAndIsActive(batchId, "PROCESSING", null, false);
+            batchRepository.updateStatusAndIsActive(batchId, "PROCESSING", false, null);
 
             generationService.runGeneration(batchId);
 
             batchRepository.deactivateOtherActiveBatchesByWeightClassId(weightClassId, batchId);
 
-            batchRepository.updateStatusAndIsActive(batchId, "COMPLETED", null, true);
+            batchRepository.updateStatusAndIsActive(batchId, "COMPLETED", true, null);
 
         } catch (Exception e) {
-            batchRepository.updateStatusAndIsActive(batchId, "FAILED", e.getMessage(), false);
+            batchRepository.updateStatusAndIsActive(batchId, "FAILED", false, e.getMessage());
         }
     }
 }

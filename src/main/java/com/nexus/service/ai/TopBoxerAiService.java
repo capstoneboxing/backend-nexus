@@ -23,9 +23,9 @@ Field names must match the JSON schema exactly.
 
     private static final String SHORT_RUBRIC = """
 Core rules:
-- Return exactly 10 boxers ranked 1 to 10.
+- Return exactly %d boxers ranked 1 to %d.
 - Score relative to the %s division.
-- Be consistent across all 10 fighters.
+- Be consistent across all %d fighters.
 - Avoid giving too many 10s.
 - Use realistic boxing knowledge.
 
@@ -52,11 +52,11 @@ Scoring scale for all other attributes:
 - 10 = near-ideal for the division / all-time level
 
 Attribute groups:
-- Physical = athletic ability
-- Technical = skill execution
-- Tactical = ring IQ and strategy
-- Psychological = composure, toughness, focus
-- Experience = quality of opposition and career level
+- Physical = size, athletic traits, speed, strength, endurance, and reactions
+- Technical = execution of punches, defense, footwork, counters, and combinations
+- Tactical = decision-making, adjustment, distance control, tempo control, opponent reading, and game-plan execution
+- Psychological = composure, aggression control, toughness, focus, and recovery from adversity
+- Performance = record efficiency, title experience, opposition quality, activity level, and consistency
 
 sourceNote:
 - Briefly mention ranking and scoring basis.
@@ -64,11 +64,11 @@ sourceNote:
 
     private static final String FULL_RUBRIC = """
 Core rules:
-- Return exactly 10 boxers.
-- rankingPosition must be 1 through 10.
+- Return exactly %d boxers.
+- rankingPosition must be 1 through %d.
 - Use historically defensible all-time rankings for this weight class.
 - Score each boxer relative to the standards of the %s division.
-- Be internally consistent across all 10 fighters.
+- Be internally consistent across all %d fighters.
 - Avoid giving too many 10.0 scores unless truly justified.
 - Use decimals if needed, for example 7.5.
 
@@ -384,8 +384,8 @@ sourceNote:
         this.jsonMapper = jsonMapper;
     }
 
-    public TopBoxerAiResponse getTop10ForWeightClass(String weightClassName) {
-        String prompt = buildPrompt(weightClassName);
+    public TopBoxerAiResponse getTopBoxersForWeightClass(String weightClassName, Integer amount) {
+        String prompt = buildPrompt(weightClassName, amount);
         String response = aiService.chat(prompt);
 
         try {
@@ -396,13 +396,21 @@ sourceNote:
         }
     }
 
-    private String buildPrompt(String weightClassName) {
+    private String buildPrompt(String weightClassName, Integer amount) {
+        String rubric = USE_FULL_RUBRIC
+                ? FULL_RUBRIC.formatted(amount, amount, weightClassName, amount)
+                : SHORT_RUBRIC.formatted(amount, amount, weightClassName, amount);
+
         return """
 %s
 
 Task:
-Select the top 10 all-time boxers in the %s division.
+Select the top %d all-time boxers in the %s division.
 For each boxer, return fields that match the boxing analytics schema exactly.
+
+Additional rules:
+- Return exactly %d boxers.
+- rankingPosition must be 1 through %d.
 
 %s
 
@@ -410,8 +418,11 @@ JSON format:
 %s
 """.formatted(
                 BASE_INSTRUCTIONS,
+                amount,
                 weightClassName,
-                SCORING_RUBRIC.formatted(weightClassName),
+                amount,
+                amount,
+                rubric,
                 JSON_SCHEMA
         );
     }

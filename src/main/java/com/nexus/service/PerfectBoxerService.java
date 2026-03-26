@@ -39,34 +39,22 @@ public class PerfectBoxerService {
         this.perfectBoxerCalculator = perfectBoxerCalculator;
     }
 
-    public List<PerfectBoxer> findAll() {
-        return perfectBoxerRepository.findAll();
-    }
-
-    public PerfectBoxer getPerfectBoxerById(Integer id) {
-        return perfectBoxerRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Perfect boxer not found: " + id));
-    }
-
     public PerfectBoxer getByWeightClassId(Integer weightClassId) {
         return perfectBoxerRepository.findByWeightClassId(weightClassId)
                 .orElseThrow(() -> new IllegalArgumentException("Perfect boxer not found for weight class: " + weightClassId));
     }
 
-    public void deletePerfectBoxer(Integer id) {
-        perfectBoxerRepository.deleteById(id);
-    }
-
     @Transactional
-    public PerfectBoxerGenerationStartedResponse generateForWeightClassAsync(Integer weightClassId) {
+    public PerfectBoxerGenerationStartedResponse generateForWeightClassAsync(Integer weightClassId, Integer amount) {
         WeightClass weightClass = weightClassRepository.findById(weightClassId)
                 .orElseThrow(() -> new IllegalArgumentException("Weight class not found: " + weightClassId));
 
         PerfectBoxerGenerationBatch batch = batchRepository.save(
                 PerfectBoxerGenerationBatch.builder()
                         .weightClassId(weightClass.getWeightClassId())
-                        .isActive(false)
+                        .amount(amount)
                         .status("PENDING")
+                        .isActive(false)
                         .errorMessage(null)
                         .build()
         );
@@ -76,6 +64,7 @@ public class PerfectBoxerService {
         return new PerfectBoxerGenerationStartedResponse(
                 batch.getBatchId(),
                 batch.getWeightClassId(),
+                batch.getAmount(),
                 batch.getStatus(),
                 "Perfect boxer generation started"
         );
@@ -92,9 +81,10 @@ public class PerfectBoxerService {
         return new PerfectBoxerBatchStatusResponse(
                 batch.getBatchId(),
                 batch.getWeightClassId(),
+                batch.getAmount(),
                 batch.getStatus(),
-                batch.getErrorMessage(),
                 batch.getIsActive(),
+                batch.getErrorMessage(),
                 batch.getCreatedAt(),
                 perfectBoxerId
         );

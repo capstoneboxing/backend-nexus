@@ -10,9 +10,10 @@ import java.time.OffsetDateTime;
 public class PerfectBoxerBatchStatusResponse {
     private Integer batchId;
     private Integer weightClassId;
+    private Integer amount;
     private String status;
-    private String errorMessage;
     private Boolean isActive;
+    private String errorMessage;
     private OffsetDateTime createdAt;
     private Integer perfectBoxerId;
 }

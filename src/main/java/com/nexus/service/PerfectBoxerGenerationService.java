@@ -54,9 +54,12 @@ public class PerfectBoxerGenerationService {
         WeightClass weightClass = weightClassRepository.findById(batch.getWeightClassId())
                 .orElseThrow(() -> new IllegalArgumentException("Weight class not found: " + batch.getWeightClassId()));
 
-        TopBoxerAiResponse aiResponse = topBoxerAiService.getTop10ForWeightClass(weightClass.getClassName());
+        Integer amount = batch.getAmount();
 
-        validateAiResponse(aiResponse);
+        TopBoxerAiResponse aiResponse =
+                topBoxerAiService.getTopBoxersForWeightClass(weightClass.getClassName(), amount);
+
+        validateAiResponse(aiResponse, amount);
 
         List<AllTimeRankedBoxer> rankedBoxers = mapAndSaveRankedBoxers(
                 batchId,
@@ -73,9 +76,9 @@ public class PerfectBoxerGenerationService {
         perfectBoxerRepository.save(perfectBoxer);
     }
 
-    private void validateAiResponse(TopBoxerAiResponse aiResponse) {
-        if (aiResponse == null || aiResponse.getBoxers() == null || aiResponse.getBoxers().size() != 10) {
-            throw new IllegalArgumentException("AI must return exactly 10 boxers.");
+    private void validateAiResponse(TopBoxerAiResponse aiResponse, Integer amount) {
+        if (aiResponse == null || aiResponse.getBoxers() == null || aiResponse.getBoxers().size() != amount) {
+            throw new IllegalArgumentException("AI must return exactly " + amount + " boxers.");
         }
 
         List<Integer> rankings = aiResponse.getBoxers().stream()
@@ -83,9 +86,9 @@ public class PerfectBoxerGenerationService {
                 .sorted()
                 .toList();
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < amount; i++) {
             if (!rankings.get(i).equals(i + 1)) {
-                throw new IllegalArgumentException("AI rankings must be exactly 1 through 10.");
+                throw new IllegalArgumentException("AI rankings must be exactly 1 through " + amount + ".");
             }
         }
     }
