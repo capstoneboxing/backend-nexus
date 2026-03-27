@@ -4,6 +4,7 @@ import com.nexus.model.PerfectBoxerGenerationBatch;
 import org.springframework.data.jdbc.repository.query.Modifying;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.ListCrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -31,13 +32,18 @@ public interface PerfectBoxerGenerationBatchRepository extends ListCrudRepositor
 
     @Modifying
     @Query("""
-UPDATE perfect_boxer_generation_batch
-SET status = :status,
-    error_message = :errorMessage,
-    is_active = :isActive
-WHERE batch_id = :batchId
+    UPDATE perfect_boxer_generation_batch
+    SET status = :status,
+        error_message = :errorMessage,
+        is_active = :isActive
+    WHERE batch_id = :batchId
 """)
-    void updateStatusAndIsActive(Integer batchId, String status, Boolean isActive, String errorMessage);
+    void updateStatusAndIsActive(
+            @Param("batchId") Integer batchId,
+            @Param("status") String status,
+            @Param("isActive") Boolean isActive,
+            @Param("errorMessage") String errorMessage
+    );
 
     @Modifying
     @Query("""

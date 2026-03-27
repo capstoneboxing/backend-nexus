@@ -1,5 +1,6 @@
 package com.nexus.service;
 
+import com.nexus.exception.ResourceNotFoundException;
 import com.nexus.model.PerfectBoxerGenerationBatch;
 import com.nexus.repository.PerfectBoxerGenerationBatchRepository;
 import org.springframework.scheduling.annotation.Async;
@@ -23,7 +24,7 @@ public class PerfectBoxerAsyncService {
     public void generateForBatchAsync(Integer batchId) {
         try {
             PerfectBoxerGenerationBatch batch = batchRepository.findById(batchId)
-                    .orElseThrow(() -> new IllegalArgumentException("Batch not found: " + batchId));
+                    .orElseThrow(() -> new ResourceNotFoundException("Batch not found: " + batchId));
 
             Integer weightClassId = batch.getWeightClassId();
 

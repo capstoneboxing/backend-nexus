@@ -2,6 +2,7 @@ package com.nexus.service;
 
 import com.nexus.model.AllTimeRankedBoxer;
 import com.nexus.model.PerfectBoxer;
+import com.nexus.util.AppUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -51,8 +52,8 @@ public class PerfectBoxerCalculator {
                 .focusConsistency(avg(boxers, AllTimeRankedBoxer::getFocusConsistency))
                 .resilienceAfterKnockdown(avg(boxers, AllTimeRankedBoxer::getResilienceAfterKnockdown))
 
-                .winRatio(roundTo2DecimalPlaces(avg(boxers, AllTimeRankedBoxer::getWinRatio)))
-                .knockoutRatio(roundTo2DecimalPlaces(avg(boxers, AllTimeRankedBoxer::getKnockoutRatio)))
+                .winRatio(AppUtils.roundTo2DecimalPlaces(avg(boxers, AllTimeRankedBoxer::getWinRatio)))
+                .knockoutRatio(AppUtils.roundTo2DecimalPlaces(avg(boxers, AllTimeRankedBoxer::getKnockoutRatio)))
                 .titleFightExperience(avg(boxers, AllTimeRankedBoxer::getTitleFightExperience))
                 .strengthOfOpposition(avg(boxers, AllTimeRankedBoxer::getStrengthOfOpposition))
                 .recentFightActivity(avg(boxers, AllTimeRankedBoxer::getRecentFightActivity))
@@ -69,9 +70,5 @@ public class PerfectBoxerCalculator {
                 .mapToDouble(Double::doubleValue)
                 .average()
                 .orElseThrow(() -> new IllegalArgumentException("Cannot calculate average from null values"));
-    }
-
-    private double roundTo2DecimalPlaces(double value) {
-        return Math.round(value * 100.0) / 100.0;
     }
 }

@@ -4,6 +4,8 @@ import com.nexus.dto.allTimeRankedBoxer.AllTimeRankedBoxerResponse;
 import com.nexus.dto.allTimeRankedBoxer.AllTimeRankedBoxerUpdateRequest;
 import com.nexus.dto.allTimeRankedBoxer.GeneratedBoxerProfileResponse;
 import com.nexus.exception.BoxerProfileLookupException;
+import com.nexus.exception.ResourceNotFoundException;
+import com.nexus.mapper.AllTimeRankedBoxerMapper;
 import com.nexus.model.AllTimeRankedBoxer;
 import com.nexus.model.PerfectBoxerGenerationBatch;
 import com.nexus.model.WeightClass;
@@ -25,63 +27,61 @@ public class AllTimeRankedBoxerService {
     private final PerfectBoxerGenerationBatchRepository batchRepository;
     private final WeightClassRepository weightClassRepository;
     private final SingleBoxerAiService singleBoxerAiService;
+    private final AllTimeRankedBoxerMapper allTimeRankedBoxerMapper;
 
     public AllTimeRankedBoxerService(
             AllTimeRankedBoxerRepository rankedBoxerRepository,
             PerfectBoxerGenerationBatchRepository batchRepository,
             WeightClassRepository weightClassRepository,
-            SingleBoxerAiService singleBoxerAiService
+            SingleBoxerAiService singleBoxerAiService,
+            AllTimeRankedBoxerMapper allTimeRankedBoxerMapper
     ) {
         this.rankedBoxerRepository = rankedBoxerRepository;
         this.batchRepository = batchRepository;
         this.weightClassRepository = weightClassRepository;
         this.singleBoxerAiService = singleBoxerAiService;
+        this.allTimeRankedBoxerMapper = allTimeRankedBoxerMapper;
     }
 
-    public List<AllTimeRankedBoxerResponse> findAll() {
-        return rankedBoxerRepository.findAll()
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
-    }
+
 
     public AllTimeRankedBoxerResponse findById(Integer id) {
         AllTimeRankedBoxer boxer = rankedBoxerRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Ranked boxer not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Ranked boxer not found: " + id));
 
-        return mapToResponse(boxer);
+        return allTimeRankedBoxerMapper.toResponse(boxer);
     }
 
     public List<AllTimeRankedBoxerResponse> findByBatchId(Integer batchId) {
         return rankedBoxerRepository.findByBatchIdOrderByRankingPositionAsc(batchId)
                 .stream()
-                .map(this::mapToResponse)
+                .map(allTimeRankedBoxerMapper::toResponse)
                 .toList();
     }
 
     public List<AllTimeRankedBoxerResponse> findByWeightClassId(Integer weightClassId) {
         return rankedBoxerRepository.findByWeightClassIdOrderByRankingPositionAsc(weightClassId)
                 .stream()
-                .map(this::mapToResponse)
+                .map(allTimeRankedBoxerMapper::toResponse)
                 .toList();
     }
 
     public List<AllTimeRankedBoxerResponse> findActiveByWeightClassId(Integer weightClassId) {
         PerfectBoxerGenerationBatch activeBatch = batchRepository.findByWeightClassIdAndIsActiveTrue(weightClassId)
-                .orElseThrow(() -> new IllegalArgumentException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "No active batch found for weight class: " + weightClassId
                 ));
 
         return rankedBoxerRepository.findByBatchIdOrderByRankingPositionAsc(activeBatch.getBatchId())
                 .stream()
-                .map(this::mapToResponse)
+                .map(allTimeRankedBoxerMapper::toResponse)
                 .toList();
     }
 
     @Transactional
     public AllTimeRankedBoxerResponse update(Integer id, AllTimeRankedBoxerUpdateRequest request) {
         AllTimeRankedBoxer boxer = rankedBoxerRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Ranked boxer not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Ranked boxer not found: " + id));
 
         if (request.heightCm() != null) boxer.setHeightCm(request.heightCm());
         if (request.reachCm() != null) boxer.setReachCm(request.reachCm());
@@ -123,19 +123,12 @@ public class AllTimeRankedBoxerService {
         if (request.sourceNote() != null) boxer.setSourceNote(request.sourceNote());
 
         AllTimeRankedBoxer saved = rankedBoxerRepository.save(boxer);
-        return mapToResponse(saved);
-    }
-
-    public void delete(Integer id) {
-        if (!rankedBoxerRepository.existsById(id)) {
-            throw new IllegalArgumentException("Ranked boxer not found: " + id);
-        }
-        rankedBoxerRepository.deleteById(id);
+        return allTimeRankedBoxerMapper.toResponse(saved);
     }
 
     public GeneratedBoxerProfileResponse generateBoxerProfile(String boxerName, Integer weightClassId) {
         WeightClass weightClass = weightClassRepository.findById(weightClassId)
-                .orElseThrow(() -> new IllegalArgumentException("Weight class not found: " + weightClassId));
+                .orElseThrow(() -> new ResourceNotFoundException("Weight class not found: " + weightClassId));
 
         var aiResponse = singleBoxerAiService.getBoxerProfile(boxerName, weightClass.getClassName());
 
@@ -193,50 +186,6 @@ public class AllTimeRankedBoxerService {
                 boxer.getRecentFightActivity(),
                 boxer.getPerformanceConsistency(),
                 boxer.getSourceNote()
-        );
-    }
-
-    private AllTimeRankedBoxerResponse mapToResponse(AllTimeRankedBoxer boxer) {
-        return new AllTimeRankedBoxerResponse(
-                boxer.getRankedBoxerId(),
-                boxer.getBatchId(),
-                boxer.getWeightClassId(),
-                boxer.getBoxerName(),
-                boxer.getRankingPosition(),
-                boxer.getHeightCm(),
-                boxer.getReachCm(),
-                boxer.getWeightClassAlignment(),
-                boxer.getHandSpeed(),
-                boxer.getFootSpeed(),
-                boxer.getStrength(),
-                boxer.getEndurance(),
-                boxer.getReactionTime(),
-                boxer.getPunchAccuracy(),
-                boxer.getPunchVariety(),
-                boxer.getDefensiveGuardEfficiency(),
-                boxer.getHeadMovement(),
-                boxer.getFootworkTechnique(),
-                boxer.getCounterpunchingAbility(),
-                boxer.getCombinationEfficiency(),
-                boxer.getRingIq(),
-                boxer.getAdaptabilityMidFight(),
-                boxer.getDistanceControl(),
-                boxer.getTempoControl(),
-                boxer.getOpponentPatternRecognition(),
-                boxer.getFightPlanningDiscipline(),
-                boxer.getComposureUnderPressure(),
-                boxer.getAggressionControl(),
-                boxer.getMentalToughness(),
-                boxer.getFocusConsistency(),
-                boxer.getResilienceAfterKnockdown(),
-                boxer.getWinRatio(),
-                boxer.getKnockoutRatio(),
-                boxer.getTitleFightExperience(),
-                boxer.getStrengthOfOpposition(),
-                boxer.getRecentFightActivity(),
-                boxer.getPerformanceConsistency(),
-                boxer.getSourceNote(),
-                boxer.getGeneratedAt()
         );
     }
 }

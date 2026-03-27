@@ -2,6 +2,7 @@ package com.nexus.service;
 
 import com.nexus.dto.ai.TopBoxerAiProfile;
 import com.nexus.dto.ai.TopBoxerAiResponse;
+import com.nexus.exception.ResourceNotFoundException;
 import com.nexus.model.AllTimeRankedBoxer;
 import com.nexus.model.PerfectBoxer;
 import com.nexus.model.PerfectBoxerGenerationBatch;
@@ -49,10 +50,10 @@ public class PerfectBoxerGenerationService {
     @Transactional
     public void runGeneration(Integer batchId) {
         PerfectBoxerGenerationBatch batch = batchRepository.findById(batchId)
-                .orElseThrow(() -> new IllegalArgumentException("Batch not found: " + batchId));
+                .orElseThrow(() -> new ResourceNotFoundException("Batch not found: " + batchId));
 
         WeightClass weightClass = weightClassRepository.findById(batch.getWeightClassId())
-                .orElseThrow(() -> new IllegalArgumentException("Weight class not found: " + batch.getWeightClassId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Weight class not found: " + batch.getWeightClassId()));
 
         Integer amount = batch.getAmount();
 
