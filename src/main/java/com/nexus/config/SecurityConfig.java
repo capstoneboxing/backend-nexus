@@ -35,14 +35,20 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/v1/auth/**",
+                                "/api/v1/auth/login",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/api/v1/weight-classes/**",
-                                "/api/public/**"
+                                "/api/v1/all-time-ranked-boxers/*",
+                                "/api/v1/all-time-ranked-boxers/batch/**",
+                                "/api/v1/all-time-ranked-boxers/weight-class/**"
                         ).permitAll()
-                        .requestMatchers("/api/v1/admins/**").hasRole("ADMIN")
+                        .requestMatchers(
+                                "/api/v1/admins/**",
+                                "/api/v1/perfect-boxers/**",
+                                "/api/v1/prediction-history/**"
+                        ).hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
