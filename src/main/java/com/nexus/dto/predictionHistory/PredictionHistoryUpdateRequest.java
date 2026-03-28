@@ -1,5 +1,7 @@
 package com.nexus.dto.predictionHistory;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -14,6 +16,7 @@ public record PredictionHistoryUpdateRequest(
         String matchDecision,
 
         @NotNull(message = "Weight class ID is required")
+        @Min(1) @Max(17)
         Integer weightClassId,
 
         @NotNull(message = "Probability A is required")
