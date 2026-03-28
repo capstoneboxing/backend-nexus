@@ -1,11 +1,7 @@
 package com.nexus.controller;
 
-import com.nexus.dto.allTimeRankedBoxer.AllTimeRankedBoxerResponse;
-import com.nexus.dto.allTimeRankedBoxer.AllTimeRankedBoxerUpdateRequest;
-import com.nexus.dto.allTimeRankedBoxer.BoxerProfileLookupFailureResponse;
-import com.nexus.dto.allTimeRankedBoxer.GenerateBoxerProfileRequest;
+import com.nexus.dto.allTimeRankedBoxer.*;
 import com.nexus.dto.error.ApiErrorResponse;
-import com.nexus.exception.BoxerProfileLookupException;
 import com.nexus.service.AllTimeRankedBoxerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -182,8 +178,16 @@ public class AllTimeRankedBoxerController {
                     description = "Boxer could not be confidently identified",
                     content = @Content(schema = @Schema(implementation = BoxerProfileLookupFailureResponse.class))
             ),
-            @ApiResponse(responseCode = "401", description = "Authentication required"),
-            @ApiResponse(responseCode = "403", description = "Access denied"),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Authentication required",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
             @ApiResponse(
                     responseCode = "500",
                     description = "Unexpected server error",
@@ -192,7 +196,7 @@ public class AllTimeRankedBoxerController {
     })
     @SecurityRequirement(name = "bearerAuth")
     @PostMapping("/generate-profile")
-    public ResponseEntity<?> generateProfile(@Valid @RequestBody GenerateBoxerProfileRequest request) {
+    public ResponseEntity<GeneratedBoxerProfileResponse> generateProfile(@Valid @RequestBody GenerateBoxerProfileRequest request) {
         return ResponseEntity.ok(
                 rankedBoxerService.generateBoxerProfile(
                         request.boxerName(),

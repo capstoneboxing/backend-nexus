@@ -1,8 +1,6 @@
 package com.nexus.dto.perfectboxer;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -20,7 +18,6 @@ public class PerfectBoxerBatchStatusResponse {
     private Integer weightClassId;
 
     @Schema(description = "Number of ranked boxers used for the batch", example = "10")
-    @Min(3) @Max(10)
     private Integer amount;
 
     @Schema(description = "Current batch status", example = "COMPLETED")

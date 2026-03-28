@@ -14,6 +14,7 @@ public record PerfectBoxerGenerationRequest(
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
         @NotNull(message = "Weight class id is required")
+        @Min(1) @Max(17)
         Integer weightClassId,
 
         @Schema(
