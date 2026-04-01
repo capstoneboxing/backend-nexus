@@ -1,14 +1,15 @@
 server:
-  port: 8081
+  port: ${PORT:8081}
+  forward-headers-strategy: framework
 
 spring:
   application:
     name: perfect-boxer
 
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: ${DB_URL_2}
+    username: ${DB_USERNAME_2}
+    password: ${DB_PASSWORD_2}
     driver-class-name: org.postgresql.Driver
 
   sql:
