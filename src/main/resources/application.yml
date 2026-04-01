@@ -7,9 +7,9 @@ spring:
     name: perfect-boxer
 
   datasource:
-    url: ${DB_URL_2}
-    username: ${DB_USERNAME_2}
-    password: ${DB_PASSWORD_2}
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   sql:
