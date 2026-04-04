@@ -1,7 +1,7 @@
 package com.nexus.service;
 
-import com.nexus.dto.predictionHistory.PredictionHistoryResponse;
-import com.nexus.dto.predictionHistory.PredictionHistoryUpdateRequest;
+import com.nexus.dto.prediction.PredictionHistoryResponse;
+import com.nexus.dto.prediction.PredictionResultUpdateRequest;
 import com.nexus.exception.ResourceNotFoundException;
 import com.nexus.mapper.PredictionHistoryMapper;
 import com.nexus.model.PredictionHistory;
@@ -9,6 +9,7 @@ import com.nexus.repository.PredictionHistoryRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class PredictionHistoryService {
@@ -21,10 +22,6 @@ public class PredictionHistoryService {
     ) {
         this.predictionHistoryRepository = predictionHistoryRepository;
         this.predictionHistoryMapper = predictionHistoryMapper;
-    }
-
-    public void addNewPredictionHistory(PredictionHistory predictionHistory) {
-        predictionHistoryRepository.save(predictionHistory);
     }
 
     public List<PredictionHistoryResponse> getPredictionHistories() {
@@ -43,19 +40,23 @@ public class PredictionHistoryService {
         return predictionHistoryMapper.toResponse(predictionHistory);
     }
 
-    public PredictionHistoryResponse updatePredictionHistory(Integer id, PredictionHistoryUpdateRequest request) {
+    public PredictionHistoryResponse updatePredictionHistory(Integer id, PredictionResultUpdateRequest request) {
         PredictionHistory existingPrediction = predictionHistoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Prediction history with id " + id + " does not exist"
                 ));
 
-        existingPrediction.setBoxerAName(request.boxerAName());
-        existingPrediction.setBoxerBName(request.boxerBName());
-        existingPrediction.setMatchDecision(request.matchDecision());
-        existingPrediction.setWeightClassId(request.weightClassId());
-        existingPrediction.setProbabilityA(request.probabilityA());
-        existingPrediction.setProbabilityB(request.probabilityB());
-        existingPrediction.setBreakdownSnapshot(request.breakdownSnapshot());
+        if (request.matchWinner() == null && request.matchWinMethod() != null) {
+            throw new IllegalArgumentException(
+                    "matchWinMethod cannot be provided when matchWinner is null"
+            );
+        }
+
+        String normalizedMatchWinner = normalizeToUpper(request.matchWinner());
+        String normalizedMatchWinMethod = normalizeToUpper(request.matchWinMethod());
+
+        existingPrediction.setMatchWinner(normalizedMatchWinner);
+        existingPrediction.setMatchWinMethod(normalizedMatchWinMethod);
 
         PredictionHistory savedPrediction = predictionHistoryRepository.save(existingPrediction);
         return predictionHistoryMapper.toResponse(savedPrediction);
@@ -68,5 +69,9 @@ public class PredictionHistoryService {
             );
         }
         predictionHistoryRepository.deleteById(id);
+    }
+
+    private String normalizeToUpper(String value) {
+        return value == null ? null : value.toUpperCase(Locale.ROOT);
     }
 }

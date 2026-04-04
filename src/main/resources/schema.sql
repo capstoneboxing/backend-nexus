@@ -1,3 +1,4 @@
+--DROP TABLE IF EXISTS category_weight;
 --DROP TABLE IF EXISTS prediction_history;
 --DROP TABLE IF EXISTS perfect_boxer;
 --DROP TABLE IF EXISTS all_time_ranked_boxer;
@@ -21,7 +22,90 @@ CREATE TABLE IF NOT EXISTS weight_class (
                                             CONSTRAINT chk_weightclass_min_le_max CHECK (min_weight_lb <= max_weight_lb)
 );
 
--- 3) Perfect Boxer Generation Batch
+-- 3) Category Weight
+CREATE TABLE IF NOT EXISTS category_weight (
+                                                          weight_class_id INT PRIMARY KEY
+                                                              REFERENCES weight_class(weight_class_id) ON DELETE RESTRICT,
+
+                                                          physical_weight DOUBLE PRECISION NOT NULL,
+                                                          technical_weight DOUBLE PRECISION NOT NULL,
+                                                          tactical_weight DOUBLE PRECISION NOT NULL,
+                                                          psychological_weight DOUBLE PRECISION NOT NULL,
+                                                          experience_weight DOUBLE PRECISION NOT NULL,
+
+                                                          CONSTRAINT chk_weights_nonnegative CHECK (
+                                                              physical_weight >= 0 AND
+                                                              technical_weight >= 0 AND
+                                                              tactical_weight >= 0 AND
+                                                              psychological_weight >= 0 AND
+                                                              experience_weight >= 0
+                                                              ),
+
+                                                          CONSTRAINT chk_weights_sum_to_one CHECK (
+                                                              ABS(
+                                                                      physical_weight +
+                                                                      technical_weight +
+                                                                      tactical_weight +
+                                                                      psychological_weight +
+                                                                      experience_weight
+                                                                          - 1.0
+                                                              ) < 0.000001
+                                                              )
+);
+
+-- 4) PredictionHistory
+CREATE TABLE IF NOT EXISTS prediction_history (
+                                                  prediction_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                                                  boxer_a_name VARCHAR(100) NOT NULL,
+                                                  boxer_b_name VARCHAR(100) NOT NULL,
+
+                                                  predicted_winner VARCHAR(20) NOT NULL,
+                                                  match_winner VARCHAR(20),
+                                                  match_win_method VARCHAR(20),
+
+                                                  weight_class_id INT NOT NULL
+                                                      REFERENCES weight_class(weight_class_id) ON DELETE RESTRICT,
+
+                                                  boxer_a_closeness_score DOUBLE PRECISION NOT NULL,
+                                                  boxer_b_closeness_score DOUBLE PRECISION NOT NULL,
+
+                                                  probability_a DOUBLE PRECISION NOT NULL,
+                                                  probability_b DOUBLE PRECISION NOT NULL,
+
+                                                  breakdown_snapshot JSONB,
+
+                                                  prediction_date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+                                                  CONSTRAINT chk_prediction_probs_0_1 CHECK (
+                                                      probability_a >= 0 AND probability_a <= 1
+                                                          AND probability_b >= 0 AND probability_b <= 1
+                                                      ),
+
+                                                  CONSTRAINT chk_prediction_closeness_0_1 CHECK (
+                                                      boxer_a_closeness_score >= 0 AND boxer_a_closeness_score <= 1
+                                                          AND boxer_b_closeness_score >= 0 AND boxer_b_closeness_score <= 1
+                                                      ),
+
+                                                  CONSTRAINT chk_predicted_winner CHECK (
+                                                      predicted_winner IN ('BOXER_A', 'BOXER_B', 'DRAW')
+                                                      ),
+
+                                                  CONSTRAINT chk_match_winner CHECK (
+                                                      match_winner IS NULL
+                                                          OR match_winner IN ('BOXER_A', 'BOXER_B', 'DRAW', 'NO_CONTEST')
+                                                      ),
+
+                                                  CONSTRAINT chk_match_method CHECK (
+                                                      match_win_method IS NULL
+                                                          OR match_win_method IN ('KO', 'TKO', 'DECISION', 'DISQUALIFICATION', 'NO_CONTEST')
+                                                      ),
+
+                                                  CONSTRAINT chk_match_winner_method_consistency CHECK (
+                                                      match_winner IS NOT NULL OR match_win_method IS NULL
+                                                      )
+);
+
+-- 5) Perfect Boxer Generation Batch
 CREATE TABLE IF NOT EXISTS perfect_boxer_generation_batch (
                                                               batch_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                                                               weight_class_id INT NOT NULL REFERENCES weight_class(weight_class_id) ON DELETE CASCADE,
@@ -33,7 +117,7 @@ CREATE TABLE IF NOT EXISTS perfect_boxer_generation_batch (
                                                               CONSTRAINT chk_batch_status CHECK (status IN ('PENDING', 'PROCESSING', 'COMPLETED', 'FAILED'))
 );
 
--- 4) All Time Ranked Boxer
+-- 6) All Time Ranked Boxer
 CREATE TABLE IF NOT EXISTS all_time_ranked_boxer (
                                        ranked_boxer_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                                        batch_id INT NOT NULL REFERENCES perfect_boxer_generation_batch(batch_id) ON DELETE CASCADE,
@@ -89,7 +173,7 @@ CREATE TABLE IF NOT EXISTS all_time_ranked_boxer (
                                        CONSTRAINT uq_ranked_boxer_batch_name UNIQUE (batch_id, boxer_name)
 );
 
--- 5) Perfect Boxer
+-- 7) Perfect Boxer
 CREATE TABLE IF NOT EXISTS perfect_boxer (
                                              perfect_boxer_id        INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                                              batch_id INT NOT NULL UNIQUE REFERENCES perfect_boxer_generation_batch(batch_id) ON DELETE CASCADE,
@@ -137,31 +221,8 @@ CREATE TABLE IF NOT EXISTS perfect_boxer (
                                              recent_fight_activity     DOUBLE PRECISION,
                                              performance_consistency   DOUBLE PRECISION,
 
-                                             created_at               TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- 6) PredictionHistory
-CREATE TABLE IF NOT EXISTS prediction_history (
-                                                  prediction_id        INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                                                  boxer_a_name         VARCHAR(100) NOT NULL,
-                                                  boxer_b_name         VARCHAR(100) NOT NULL,
-
-                                                  match_decision       VARCHAR(20),
-
-                                                  weight_class_id      INT NOT NULL
-                                                      REFERENCES weight_class(weight_class_id) ON DELETE RESTRICT,
-
-                                                  probability_a        DOUBLE PRECISION NOT NULL,
-                                                  probability_b        DOUBLE PRECISION NOT NULL,
-
-                                                  breakdown_snapshot   JSONB,
-
-                                                  prediction_date      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
-                                                  CONSTRAINT chk_prediction_probs_0_1 CHECK (
-                                                      probability_a >= 0 AND probability_a <= 1
-                                                          AND probability_b >= 0 AND probability_b <= 1
-                                                      )
+                                             created_at               TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                                             updated_at               TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 

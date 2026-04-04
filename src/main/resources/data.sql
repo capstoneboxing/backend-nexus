@@ -18,3 +18,21 @@ INSERT INTO weight_class (class_name, min_weight_lb, max_weight_lb) VALUES
                                                                         ('Heavyweight', 200.01, 999.00)
 ON CONFLICT (class_name) DO NOTHING;
 
+INSERT INTO category_weight (
+    weight_class_id,
+    physical_weight,
+    technical_weight,
+    tactical_weight,
+    psychological_weight,
+    experience_weight
+)
+SELECT
+    wc.weight_class_id,
+    0.20,
+    0.25,
+    0.25,
+    0.15,
+    0.15
+FROM weight_class wc
+ON CONFLICT (weight_class_id) DO NOTHING;
+

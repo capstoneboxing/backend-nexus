@@ -4,6 +4,7 @@ import com.nexus.model.PerfectBoxer;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -11,4 +12,6 @@ public interface PerfectBoxerRepository extends ListCrudRepository<PerfectBoxer,
 
     Optional<PerfectBoxer> findByWeightClassId(Integer weightClassId);
     Optional<PerfectBoxer> findByBatchId(Integer batchId);
+
+    List<PerfectBoxer> findByBatchIdIn(List<Integer> batchIds);
 }

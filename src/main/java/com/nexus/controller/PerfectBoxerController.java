@@ -18,6 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/perfect-boxers")
 @Tag(name = "Perfect Boxers", description = "Endpoints for generating and managing perfect boxer records")
@@ -27,6 +29,52 @@ public class PerfectBoxerController {
 
     public PerfectBoxerController(PerfectBoxerService generationService) {
         this.perfectBoxerService = generationService;
+    }
+
+    @Operation(
+            summary = "Get perfect boxer by ID",
+            description = "Returns a fully detailed perfect boxer record including all attributes"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Perfect boxer retrieved successfully"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Perfect boxer not found",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<PerfectBoxerResponse> getById(@PathVariable Integer id) {
+        return ResponseEntity.ok(perfectBoxerService.getById(id));
+    }
+
+    @Operation(
+            summary = "Get active perfect boxer by weight class",
+            description = "Returns the currently active perfect boxer for a specific weight class"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Active perfect boxer retrieved successfully"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Active perfect boxer or batch not found",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    @GetMapping("/active/weight-class/{weightClassId}")
+    public ResponseEntity<PerfectBoxerResponse> getActiveByWeightClassId(@PathVariable Integer weightClassId) {
+        return ResponseEntity.ok(perfectBoxerService.getActiveByWeightClassId(weightClassId));
+    }
+
+    @Operation(
+            summary = "Get all active perfect boxers",
+            description = "Returns all active perfect boxer records across weight classes"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Active perfect boxers retrieved successfully")
+    })
+    @GetMapping("/active")
+    public ResponseEntity<List<PerfectBoxerResponse>> getAllActivePerfectBoxers() {
+        return ResponseEntity.ok(perfectBoxerService.getAllActivePerfectBoxers());
     }
 
     @Operation(
@@ -40,8 +88,22 @@ public class PerfectBoxerController {
                     description = "Invalid request or validation failed",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             ),
-            @ApiResponse(responseCode = "401", description = "Authentication required"),
-            @ApiResponse(responseCode = "403", description = "Access denied"),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Authentication required",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class)
+                    )
+            ),
             @ApiResponse(
                     responseCode = "404",
                     description = "Weight class not found",
@@ -74,8 +136,22 @@ public class PerfectBoxerController {
                     description = "Batch not found",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             ),
-            @ApiResponse(responseCode = "401", description = "Authentication required"),
-            @ApiResponse(responseCode = "403", description = "Access denied"),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Authentication required",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class)
+                    )
+            ),
             @ApiResponse(
                     responseCode = "500",
                     description = "Unexpected server error",
@@ -98,42 +174,68 @@ public class PerfectBoxerController {
                     description = "Active batch not found",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             ),
-            @ApiResponse(responseCode = "401", description = "Authentication required"),
-            @ApiResponse(responseCode = "403", description = "Access denied"),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Authentication required",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class)
+                    )
+            ),
             @ApiResponse(
                     responseCode = "500",
                     description = "Unexpected server error",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             )
     })
-    @PostMapping("/regenerate/weight-class/{weightClassId}")
-    public ResponseEntity<PerfectBoxerResponse> regenerateByWeightClass(@PathVariable Integer weightClassId) {
-        PerfectBoxerResponse response = perfectBoxerService.regenerateForWeightClass(weightClassId);
-        return ResponseEntity.ok(response);
+    @PostMapping("/recalculate/weight-class/{weightClassId}")
+    public ResponseEntity<PerfectBoxerResponse> recalculateByWeightClass(@PathVariable Integer weightClassId) {
+        return ResponseEntity.ok(perfectBoxerService.recalculateForWeightClass(weightClassId));
     }
 
-    @Operation(
-            summary = "Regenerate perfect boxer by batch",
-            description = "Recalculates the perfect boxer for a specific batch. Requires a valid Bearer JWT."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Perfect boxer regenerated successfully"),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Batch not found",
-                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-            ),
-            @ApiResponse(responseCode = "401", description = "Authentication required"),
-            @ApiResponse(responseCode = "403", description = "Access denied"),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "Unexpected server error",
-                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-            )
-    })
-    @PostMapping("/regenerate/batch/{batchId}")
-    public ResponseEntity<PerfectBoxerResponse> regenerateByBatch(@PathVariable Integer batchId) {
-        PerfectBoxerResponse response = perfectBoxerService.regenerateForBatch(batchId);
-        return ResponseEntity.ok(response);
-    }
+//    @Operation(
+//            summary = "Regenerate perfect boxer by batch",
+//            description = "Recalculates the perfect boxer for a specific batch. Requires a valid Bearer JWT."
+//    )
+//    @ApiResponses({
+//            @ApiResponse(responseCode = "200", description = "Perfect boxer regenerated successfully"),
+//            @ApiResponse(
+//                    responseCode = "404",
+//                    description = "Batch not found",
+//                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+//            ),
+//            @ApiResponse(
+//                    responseCode = "401",
+//                    description = "Authentication required",
+//                    content = @Content(
+//                            mediaType = "application/json",
+//                            schema = @Schema(implementation = ApiErrorResponse.class)
+//                    )
+//            ),
+//            @ApiResponse(
+//                    responseCode = "403",
+//                    description = "Access denied",
+//                    content = @Content(
+//                            mediaType = "application/json",
+//                            schema = @Schema(implementation = ApiErrorResponse.class)
+//                    )
+//            ),
+//            @ApiResponse(
+//                    responseCode = "500",
+//                    description = "Unexpected server error",
+//                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+//            )
+//    })
+//    @PostMapping("/recalculate/batch/{batchId}")
+//    public ResponseEntity<PerfectBoxerResponse> recalculateByBatch(@PathVariable Integer batchId) {
+//        return ResponseEntity.ok(perfectBoxerService.recalculateForBatch(batchId));
+//    }
 }

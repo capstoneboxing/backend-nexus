@@ -14,6 +14,7 @@ import com.nexus.repository.WeightClassRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
@@ -43,6 +44,45 @@ public class PerfectBoxerService {
         this.perfectBoxerAsyncService = perfectBoxerAsyncService;
         this.perfectBoxerCalculator = perfectBoxerCalculator;
         this.perfectBoxerMapper = perfectBoxerMapper;
+    }
+
+    public PerfectBoxerResponse getById(Integer id) {
+        PerfectBoxer perfectBoxer = perfectBoxerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Perfect boxer not found: " + id));
+
+        return perfectBoxerMapper.toResponse(perfectBoxer);
+    }
+
+    public PerfectBoxerResponse getActiveByWeightClassId(Integer weightClassId) {
+        PerfectBoxerGenerationBatch activeBatch = batchRepository.findByWeightClassIdAndIsActiveTrue(weightClassId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No active batch found for weight class: " + weightClassId
+                ));
+
+        PerfectBoxer perfectBoxer = perfectBoxerRepository.findByBatchId(activeBatch.getBatchId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No active perfect boxer found for weight class: " + weightClassId
+                ));
+
+        return perfectBoxerMapper.toResponse(perfectBoxer);
+    }
+
+    public List<PerfectBoxerResponse> getAllActivePerfectBoxers() {
+        List<PerfectBoxerGenerationBatch> activeBatches = batchRepository.findByIsActiveTrue();
+
+        if (activeBatches.isEmpty()) {
+            return List.of();
+        }
+
+        List<Integer> batchIds = activeBatches.stream()
+                .map(PerfectBoxerGenerationBatch::getBatchId)
+                .toList();
+
+        List<PerfectBoxer> perfectBoxers = perfectBoxerRepository.findByBatchIdIn(batchIds);
+
+        return perfectBoxers.stream()
+                .map(perfectBoxerMapper::toResponse)
+                .toList();
     }
 
     @Transactional
@@ -96,17 +136,17 @@ public class PerfectBoxerService {
     }
 
     @Transactional
-    public PerfectBoxerResponse regenerateForWeightClass(Integer weightClassId) {
+    public PerfectBoxerResponse recalculateForWeightClass(Integer weightClassId) {
         PerfectBoxerGenerationBatch activeBatch = batchRepository.findByWeightClassIdAndIsActiveTrue(weightClassId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "No active batch found for weight class: " + weightClassId
                 ));
 
-        return regenerateForBatch(activeBatch.getBatchId());
+        return recalculateForBatch(activeBatch.getBatchId());
     }
 
     @Transactional
-    public PerfectBoxerResponse regenerateForBatch(Integer batchId) {
+    public PerfectBoxerResponse recalculateForBatch(Integer batchId) {
         PerfectBoxerGenerationBatch batch = batchRepository.findById(batchId)
                 .orElseThrow(() -> new ResourceNotFoundException("Batch not found: " + batchId));
 
@@ -132,6 +172,8 @@ public class PerfectBoxerService {
         PerfectBoxer savedPerfectBoxer = perfectBoxerRepository.findByBatchId(batchId)
                 .map(existing -> {
                     recalculated.setPerfectBoxerId(existing.getPerfectBoxerId());
+                    recalculated.setCreatedAt(existing.getCreatedAt());
+                    recalculated.setUpdatedAt(OffsetDateTime.now());
                     return perfectBoxerRepository.save(recalculated);
                 })
                 .orElseGet(() -> perfectBoxerRepository.save(recalculated));

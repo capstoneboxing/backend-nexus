@@ -135,7 +135,6 @@ public class AllTimeRankedBoxer {
     @Column("source_note")
     private String sourceNote;
 
-    @ReadOnlyProperty
     @Column("generated_at")
     private OffsetDateTime generatedAt;
 }
