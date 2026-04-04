@@ -231,7 +231,6 @@ public class AllTimeRankedBoxerController {
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             )
     })
-    @SecurityRequirement(name = "bearerAuth")
     @PostMapping("/generate-profile")
     public ResponseEntity<GeneratedBoxerProfileResponse> generateProfile(@Valid @RequestBody GenerateBoxerProfileRequest request) {
         return ResponseEntity.ok(

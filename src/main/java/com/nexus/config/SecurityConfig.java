@@ -62,6 +62,10 @@ public class SecurityConfig {
                                 "/api/v1/all-time-ranked-boxers/**",
                                 "/api/v1/prediction-history/**"
                         ).permitAll()
+                        .requestMatchers(
+                                org.springframework.http.HttpMethod.POST,
+                                "/api/v1/all-time-ranked-boxers/**"
+                        ).permitAll()
 
                         .requestMatchers(
                                 "/api/v1/admins/**",
