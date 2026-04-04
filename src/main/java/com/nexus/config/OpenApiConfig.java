@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
         info = @Info(
                 title = "Nexus Boxing API",
                 version = "v1",
-                description = "REST API for admin, authentication, all time ranked boxers, perfect boxer generation, prediction history, and weight classes."
+                description = "REST API for authentication, all time ranked boxers, perfect boxer generation, updating category weights, making predictions, managing prediction histories, and weight classes."
         )
 )
 @SecurityScheme(

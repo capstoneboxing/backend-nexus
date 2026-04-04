@@ -7,6 +7,7 @@ import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -54,4 +55,6 @@ public interface PerfectBoxerGenerationBatchRepository extends ListCrudRepositor
       AND is_active = TRUE
 """)
     void deactivateOtherActiveBatchesByWeightClassId(Integer weightClassId, Integer batchId);
+
+    List<PerfectBoxerGenerationBatch> findByIsActiveTrue();
 }

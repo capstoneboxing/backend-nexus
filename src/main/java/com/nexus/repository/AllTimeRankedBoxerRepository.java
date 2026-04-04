@@ -14,4 +14,6 @@ public interface AllTimeRankedBoxerRepository extends ListCrudRepository<AllTime
 
     List<AllTimeRankedBoxer> findByWeightClassIdAndBatchIdOrderByRankingPositionAsc(Integer weightClassId, Integer batchId);
 
+    List<AllTimeRankedBoxer> findByBatchIdInOrderByWeightClassIdAscRankingPositionAsc(List<Integer> batchIds);
+
 }

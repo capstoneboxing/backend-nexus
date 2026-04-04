@@ -4,19 +4,57 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.OffsetDateTime;
 
-@Schema(description = "Response containing a generated perfect boxer record")
+@Schema(description = "Full perfect boxer data including all attributes")
 public record PerfectBoxerResponse(
 
-        @Schema(description = "Unique ID of the perfect boxer record", example = "3")
         Integer perfectBoxerId,
-
-        @Schema(description = "Batch ID used to generate this perfect boxer", example = "12")
         Integer batchId,
-
-        @Schema(description = "Weight class ID for which the perfect boxer was generated", example = "11")
         Integer weightClassId,
 
-        @Schema(description = "Date and time when the perfect boxer record was created", example = "2026-03-27T18:30:00Z")
-        OffsetDateTime createdAt
+        // Physical
+        Double heightCm,
+        Double reachCm,
+        Double weightClassAlignment,
+        Double handSpeed,
+        Double footSpeed,
+        Double strength,
+        Double endurance,
+        Double reactionTime,
+
+        // Technical
+        Double punchAccuracy,
+        Double punchVariety,
+        Double defensiveGuardEfficiency,
+        Double headMovement,
+        Double footworkTechnique,
+        Double counterpunchingAbility,
+        Double combinationEfficiency,
+
+        // Tactical
+        Double ringIq,
+        Double adaptabilityMidFight,
+        Double distanceControl,
+        Double tempoControl,
+        Double opponentPatternRecognition,
+        Double fightPlanningDiscipline,
+
+        // Psychological
+        Double composureUnderPressure,
+        Double aggressionControl,
+        Double mentalToughness,
+        Double focusConsistency,
+        Double resilienceAfterKnockdown,
+
+        // Performance
+        Double winRatio,
+        Double knockoutRatio,
+        Double titleFightExperience,
+        Double strengthOfOpposition,
+        Double recentFightActivity,
+        Double performanceConsistency,
+
+        OffsetDateTime createdAt,
+        OffsetDateTime updatedAt
 ) {
+
 }

@@ -74,6 +74,9 @@ public class PerfectBoxerGenerationService {
                 rankedBoxers
         );
 
+        perfectBoxer.setCreatedAt(OffsetDateTime.now());
+        perfectBoxer.setUpdatedAt(OffsetDateTime.now());
+
         perfectBoxerRepository.save(perfectBoxer);
     }
 

@@ -30,7 +30,7 @@ public class DataInitializer {
                     adminRepository.save(admin);
                 }
 
-                System.out.println("✅ 4 default admins created");
+                System.out.println(usernames.length + " default admins created");
             }
         };
     }

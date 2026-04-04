@@ -2,6 +2,7 @@ package com.nexus.service;
 
 import com.nexus.dto.allTimeRankedBoxer.AllTimeRankedBoxerResponse;
 import com.nexus.dto.allTimeRankedBoxer.AllTimeRankedBoxerUpdateRequest;
+import com.nexus.dto.allTimeRankedBoxer.AllTimeRankedBoxerWithBatchStatusResponse;
 import com.nexus.dto.allTimeRankedBoxer.GeneratedBoxerProfileResponse;
 import com.nexus.exception.BoxerProfileLookupException;
 import com.nexus.exception.ResourceNotFoundException;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class AllTimeRankedBoxerService {
@@ -66,6 +69,24 @@ public class AllTimeRankedBoxerService {
                 .toList();
     }
 
+    public List<AllTimeRankedBoxerResponse> findAllActive() {
+        List<PerfectBoxerGenerationBatch> activeBatches = batchRepository.findByIsActiveTrue();
+
+        if (activeBatches.isEmpty()) {
+            return List.of();
+        }
+
+        List<Integer> batchIds = activeBatches.stream()
+                .map(PerfectBoxerGenerationBatch::getBatchId)
+                .toList();
+
+        return rankedBoxerRepository
+                .findByBatchIdInOrderByWeightClassIdAscRankingPositionAsc(batchIds)
+                .stream()
+                .map(allTimeRankedBoxerMapper::toResponse)
+                .toList();
+    }
+
     public List<AllTimeRankedBoxerResponse> findActiveByWeightClassId(Integer weightClassId) {
         PerfectBoxerGenerationBatch activeBatch = batchRepository.findByWeightClassIdAndIsActiveTrue(weightClassId)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -75,6 +96,28 @@ public class AllTimeRankedBoxerService {
         return rankedBoxerRepository.findByBatchIdOrderByRankingPositionAsc(activeBatch.getBatchId())
                 .stream()
                 .map(allTimeRankedBoxerMapper::toResponse)
+                .toList();
+    }
+
+    public List<AllTimeRankedBoxerWithBatchStatusResponse> findAllWithBatchStatus() {
+
+        List<AllTimeRankedBoxer> boxers = rankedBoxerRepository.findAll();
+
+        // Get all batches once (avoid querying inside loop)
+        List<PerfectBoxerGenerationBatch> batches = batchRepository.findAll();
+
+        // Map batchId -> isActive
+        Map<Integer, Boolean> batchStatusMap = batches.stream()
+                .collect(Collectors.toMap(
+                        PerfectBoxerGenerationBatch::getBatchId,
+                        PerfectBoxerGenerationBatch::getIsActive
+                ));
+
+        return boxers.stream()
+                .map(boxer -> new AllTimeRankedBoxerWithBatchStatusResponse(
+                        allTimeRankedBoxerMapper.toResponse(boxer),
+                        batchStatusMap.getOrDefault(boxer.getBatchId(), false)
+                ))
                 .toList();
     }
 

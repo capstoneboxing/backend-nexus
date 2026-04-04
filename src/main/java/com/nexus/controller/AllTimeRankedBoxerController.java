@@ -104,6 +104,23 @@ public class AllTimeRankedBoxerController {
     }
 
     @Operation(
+            summary = "Get all active ranked boxers",
+            description = "Returns all ranked boxers from all active batches across all weight classes."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Active ranked boxers retrieved successfully"),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Unexpected server error",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    @GetMapping("/active")
+    public ResponseEntity<List<AllTimeRankedBoxerResponse>> getAllActive() {
+        return ResponseEntity.ok(rankedBoxerService.findAllActive());
+    }
+
+    @Operation(
             summary = "Get active ranked boxers by weight class ID",
             description = "Returns the ranked boxers in the active batch currently used to calculate the perfect boxer for that weight class."
     )
@@ -120,7 +137,7 @@ public class AllTimeRankedBoxerController {
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             )
     })
-    @GetMapping("/weight-class/{weightClassId}/active")
+    @GetMapping("/active/weight-class/{weightClassId}")
     public ResponseEntity<List<AllTimeRankedBoxerResponse>> getActiveByWeightClassId(
             @Parameter(description = "Weight class ID", example = "11")
             @PathVariable Integer weightClassId
@@ -144,8 +161,22 @@ public class AllTimeRankedBoxerController {
                     description = "Ranked boxer not found",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             ),
-            @ApiResponse(responseCode = "401", description = "Authentication required"),
-            @ApiResponse(responseCode = "403", description = "Access denied"),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Authentication required",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class)
+                    )
+            ),
             @ApiResponse(
                     responseCode = "500",
                     description = "Unexpected server error",
@@ -181,12 +212,18 @@ public class AllTimeRankedBoxerController {
             @ApiResponse(
                     responseCode = "401",
                     description = "Authentication required",
-                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "403",
                     description = "Access denied",
-                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class)
+                    )
             ),
             @ApiResponse(
                     responseCode = "500",
@@ -203,5 +240,14 @@ public class AllTimeRankedBoxerController {
                         request.weightClassId()
                 )
         );
+    }
+
+    @Operation(
+            summary = "Get all ranked boxers with isActive status",
+            description = "Returns all ranked boxers and indicates whether their batch is active."
+    )
+    @GetMapping("/with-isActive")
+    public ResponseEntity<List<AllTimeRankedBoxerWithBatchStatusResponse>> getAllWithBatchStatus() {
+        return ResponseEntity.ok(rankedBoxerService.findAllWithBatchStatus());
     }
 }

@@ -20,4 +20,13 @@ public final class AppUtils {
     public static double roundTo2DecimalPlaces(double value) {
         return Math.round(value * 100.0) / 100.0;
     }
+
+    public static double roundTo1DecimalPlace(double value) {
+        return Math.round(value * 10.0) / 10.0;
+    }
+
+    public static double round(double value, int places) {
+        double factor = Math.pow(10, places);
+        return Math.round(value * factor) / factor;
+    }
 }

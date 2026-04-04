@@ -22,44 +22,48 @@ public class PerfectBoxerCalculator {
                 .batchId(batchId)
                 .weightClassId(weightClassId)
 
-                .heightCm(avg(boxers, AllTimeRankedBoxer::getHeightCm))
-                .reachCm(avg(boxers, AllTimeRankedBoxer::getReachCm))
-                .weightClassAlignment(avg(boxers, AllTimeRankedBoxer::getWeightClassAlignment))
-                .handSpeed(avg(boxers, AllTimeRankedBoxer::getHandSpeed))
-                .footSpeed(avg(boxers, AllTimeRankedBoxer::getFootSpeed))
-                .strength(avg(boxers, AllTimeRankedBoxer::getStrength))
-                .endurance(avg(boxers, AllTimeRankedBoxer::getEndurance))
-                .reactionTime(avg(boxers, AllTimeRankedBoxer::getReactionTime))
+                // Physical
+                .heightCm(avg1(boxers, AllTimeRankedBoxer::getHeightCm))
+                .reachCm(avg1(boxers, AllTimeRankedBoxer::getReachCm))
+                .weightClassAlignment(avg1(boxers, AllTimeRankedBoxer::getWeightClassAlignment))
+                .handSpeed(avg1(boxers, AllTimeRankedBoxer::getHandSpeed))
+                .footSpeed(avg1(boxers, AllTimeRankedBoxer::getFootSpeed))
+                .strength(avg1(boxers, AllTimeRankedBoxer::getStrength))
+                .endurance(avg1(boxers, AllTimeRankedBoxer::getEndurance))
+                .reactionTime(avg1(boxers, AllTimeRankedBoxer::getReactionTime))
 
-                .punchAccuracy(avg(boxers, AllTimeRankedBoxer::getPunchAccuracy))
-                .punchVariety(avg(boxers, AllTimeRankedBoxer::getPunchVariety))
-                .defensiveGuardEfficiency(avg(boxers, AllTimeRankedBoxer::getDefensiveGuardEfficiency))
-                .headMovement(avg(boxers, AllTimeRankedBoxer::getHeadMovement))
-                .footworkTechnique(avg(boxers, AllTimeRankedBoxer::getFootworkTechnique))
-                .counterpunchingAbility(avg(boxers, AllTimeRankedBoxer::getCounterpunchingAbility))
-                .combinationEfficiency(avg(boxers, AllTimeRankedBoxer::getCombinationEfficiency))
+                // Technical
+                .punchAccuracy(avg1(boxers, AllTimeRankedBoxer::getPunchAccuracy))
+                .punchVariety(avg1(boxers, AllTimeRankedBoxer::getPunchVariety))
+                .defensiveGuardEfficiency(avg1(boxers, AllTimeRankedBoxer::getDefensiveGuardEfficiency))
+                .headMovement(avg1(boxers, AllTimeRankedBoxer::getHeadMovement))
+                .footworkTechnique(avg1(boxers, AllTimeRankedBoxer::getFootworkTechnique))
+                .counterpunchingAbility(avg1(boxers, AllTimeRankedBoxer::getCounterpunchingAbility))
+                .combinationEfficiency(avg1(boxers, AllTimeRankedBoxer::getCombinationEfficiency))
 
-                .ringIq(avg(boxers, AllTimeRankedBoxer::getRingIq))
-                .adaptabilityMidFight(avg(boxers, AllTimeRankedBoxer::getAdaptabilityMidFight))
-                .distanceControl(avg(boxers, AllTimeRankedBoxer::getDistanceControl))
-                .tempoControl(avg(boxers, AllTimeRankedBoxer::getTempoControl))
-                .opponentPatternRecognition(avg(boxers, AllTimeRankedBoxer::getOpponentPatternRecognition))
-                .fightPlanningDiscipline(avg(boxers, AllTimeRankedBoxer::getFightPlanningDiscipline))
+                // Tactical
+                .ringIq(avg1(boxers, AllTimeRankedBoxer::getRingIq))
+                .adaptabilityMidFight(avg1(boxers, AllTimeRankedBoxer::getAdaptabilityMidFight))
+                .distanceControl(avg1(boxers, AllTimeRankedBoxer::getDistanceControl))
+                .tempoControl(avg1(boxers, AllTimeRankedBoxer::getTempoControl))
+                .opponentPatternRecognition(avg1(boxers, AllTimeRankedBoxer::getOpponentPatternRecognition))
+                .fightPlanningDiscipline(avg1(boxers, AllTimeRankedBoxer::getFightPlanningDiscipline))
 
-                .composureUnderPressure(avg(boxers, AllTimeRankedBoxer::getComposureUnderPressure))
-                .aggressionControl(avg(boxers, AllTimeRankedBoxer::getAggressionControl))
-                .mentalToughness(avg(boxers, AllTimeRankedBoxer::getMentalToughness))
-                .focusConsistency(avg(boxers, AllTimeRankedBoxer::getFocusConsistency))
-                .resilienceAfterKnockdown(avg(boxers, AllTimeRankedBoxer::getResilienceAfterKnockdown))
+                // Psychological
+                .composureUnderPressure(avg1(boxers, AllTimeRankedBoxer::getComposureUnderPressure))
+                .aggressionControl(avg1(boxers, AllTimeRankedBoxer::getAggressionControl))
+                .mentalToughness(avg1(boxers, AllTimeRankedBoxer::getMentalToughness))
+                .focusConsistency(avg1(boxers, AllTimeRankedBoxer::getFocusConsistency))
+                .resilienceAfterKnockdown(avg1(boxers, AllTimeRankedBoxer::getResilienceAfterKnockdown))
 
-                .winRatio(AppUtils.roundTo2DecimalPlaces(avg(boxers, AllTimeRankedBoxer::getWinRatio)))
-                .knockoutRatio(AppUtils.roundTo2DecimalPlaces(avg(boxers, AllTimeRankedBoxer::getKnockoutRatio)))
-                .titleFightExperience(avg(boxers, AllTimeRankedBoxer::getTitleFightExperience))
-                .strengthOfOpposition(avg(boxers, AllTimeRankedBoxer::getStrengthOfOpposition))
-                .recentFightActivity(avg(boxers, AllTimeRankedBoxer::getRecentFightActivity))
-                .performanceConsistency(avg(boxers, AllTimeRankedBoxer::getPerformanceConsistency))
+                // Performance
+                .winRatio(avg2(boxers, AllTimeRankedBoxer::getWinRatio))
+                .knockoutRatio(avg2(boxers, AllTimeRankedBoxer::getKnockoutRatio))
+                .titleFightExperience(avg1(boxers, AllTimeRankedBoxer::getTitleFightExperience))
+                .strengthOfOpposition(avg1(boxers, AllTimeRankedBoxer::getStrengthOfOpposition))
+                .recentFightActivity(avg1(boxers, AllTimeRankedBoxer::getRecentFightActivity))
+                .performanceConsistency(avg1(boxers, AllTimeRankedBoxer::getPerformanceConsistency))
 
-                .createdAt(OffsetDateTime.now())
                 .build();
     }
 
@@ -70,5 +74,13 @@ public class PerfectBoxerCalculator {
                 .mapToDouble(Double::doubleValue)
                 .average()
                 .orElseThrow(() -> new IllegalArgumentException("Cannot calculate average from null values"));
+    }
+
+    private Double avg1(List<AllTimeRankedBoxer> list, Function<AllTimeRankedBoxer, Double> extractor) {
+        return AppUtils.roundTo1DecimalPlace(avg(list, extractor));
+    }
+
+    private Double avg2(List<AllTimeRankedBoxer> list, Function<AllTimeRankedBoxer, Double> extractor) {
+        return AppUtils.roundTo2DecimalPlaces(avg(list, extractor));
     }
 }

@@ -88,8 +88,22 @@ public class AuthController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Admin retrieved successfully"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized - missing or invalid token"),
-            @ApiResponse(responseCode = "403", description = "Access denied"),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Authentication required",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class)
+                    )
+            ),
             @ApiResponse(
                     responseCode = "404",
                     description = "Admin not found",

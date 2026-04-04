@@ -125,8 +125,10 @@ public class PerfectBoxer {
     @Column("performance_consistency")
     private Double performanceConsistency;
 
-    @ReadOnlyProperty
     @Column("created_at")
     private OffsetDateTime createdAt;
+
+    @Column("updated_at")
+    private OffsetDateTime updatedAt;
 
 }

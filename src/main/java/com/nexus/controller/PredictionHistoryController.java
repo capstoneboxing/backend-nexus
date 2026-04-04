@@ -1,8 +1,8 @@
 package com.nexus.controller;
 
 import com.nexus.dto.error.ApiErrorResponse;
-import com.nexus.dto.predictionHistory.PredictionHistoryResponse;
-import com.nexus.dto.predictionHistory.PredictionHistoryUpdateRequest;
+import com.nexus.dto.prediction.PredictionHistoryResponse;
+import com.nexus.dto.prediction.PredictionResultUpdateRequest;
 import com.nexus.service.PredictionHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -21,7 +21,6 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "api/v1/prediction-history")
 @Tag(name = "Prediction History", description = "Endpoints for viewing and managing saved fight prediction history")
-@SecurityRequirement(name = "bearerAuth")
 public class PredictionHistoryController {
 
     private final PredictionHistoryService predictionHistoryService;
@@ -32,12 +31,26 @@ public class PredictionHistoryController {
 
     @Operation(
             summary = "Get all prediction history",
-            description = "Returns all saved prediction history records. Requires a valid Bearer JWT."
+            description = "Returns all saved prediction history records."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Prediction history retrieved successfully"),
-            @ApiResponse(responseCode = "401", description = "Authentication required"),
-            @ApiResponse(responseCode = "403", description = "Access denied"),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Authentication required",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class)
+                    )
+            ),
             @ApiResponse(
                     responseCode = "500",
                     description = "Unexpected server error",
@@ -51,7 +64,7 @@ public class PredictionHistoryController {
 
     @Operation(
             summary = "Get prediction history by ID",
-            description = "Returns one saved prediction history record by prediction ID. Requires a valid Bearer JWT."
+            description = "Returns one saved prediction history record by prediction ID."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Prediction history found"),
@@ -60,8 +73,22 @@ public class PredictionHistoryController {
                     description = "Prediction history not found",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             ),
-            @ApiResponse(responseCode = "401", description = "Authentication required"),
-            @ApiResponse(responseCode = "403", description = "Access denied"),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Authentication required",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class)
+                    )
+            ),
             @ApiResponse(
                     responseCode = "500",
                     description = "Unexpected server error",
@@ -92,19 +119,34 @@ public class PredictionHistoryController {
                     description = "Prediction history not found",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             ),
-            @ApiResponse(responseCode = "401", description = "Authentication required"),
-            @ApiResponse(responseCode = "403", description = "Access denied"),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Authentication required",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class)
+                    )
+            ),
             @ApiResponse(
                     responseCode = "500",
                     description = "Unexpected server error",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             )
     })
+    @SecurityRequirement(name = "bearerAuth")
     @PutMapping("/{id}")
     public ResponseEntity<PredictionHistoryResponse> updatePredictionHistory(
             @Parameter(description = "Prediction history ID", example = "1")
             @PathVariable Integer id,
-            @Valid @RequestBody PredictionHistoryUpdateRequest request
+            @Valid @RequestBody PredictionResultUpdateRequest request
     ) {
         return ResponseEntity.ok(predictionHistoryService.updatePredictionHistory(id, request));
     }
@@ -120,14 +162,29 @@ public class PredictionHistoryController {
                     description = "Prediction history not found",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             ),
-            @ApiResponse(responseCode = "401", description = "Authentication required"),
-            @ApiResponse(responseCode = "403", description = "Access denied"),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Authentication required",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class)
+                    )
+            ),
             @ApiResponse(
                     responseCode = "500",
                     description = "Unexpected server error",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             )
     })
+    @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePredictionHistory(
             @Parameter(description = "Prediction history ID", example = "1")
