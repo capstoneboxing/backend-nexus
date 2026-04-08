@@ -78,10 +78,10 @@ Measurement rules:
 - If exact measurements are uncertain, use the best-known commonly reported estimate.
 
 Record rules:
-- winRatio and knockoutRatio are raw decimal ratios from 0.0 to 1.0, not rubric scores.
-- Prefer values consistent with commonly reported professional records from open/public sources.
 - winRatio = wins / total fights.
 - knockoutRatio = knockout wins / total wins.
+- Both values must be raw decimal ratios from 0.0 to 1.0.
+- Prefer values consistent with commonly reported professional records from open/public sources.
 - If exact record details are uncertain, use the best-known commonly reported estimate.
 
 Scoring standard:
@@ -95,7 +95,10 @@ Scoring standard:
 - 10 = near-ideal for the division / all-time level
 
 Important scoring rules:
-- titleFightExperience, strengthOfOpposition, recentFightActivity, and performanceConsistency are scored from 1.0 to 10.0 using the rubric below.
+- All attributes below use the 1.0–10.0 scale unless stated otherwise.
+- heightCm and reachCm are raw measurements in centimeters.
+- winRatio and knockoutRatio are raw decimal ratios (0.0–1.0).
+- Use decimals when needed (e.g., 7.5).
 
 Physical attribute rubrics:
 weightClassAlignment:
