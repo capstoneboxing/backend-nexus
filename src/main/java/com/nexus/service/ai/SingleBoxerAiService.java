@@ -37,7 +37,7 @@ Record rules:
 - knockoutRatio = knockout wins / total wins.
 - If exact record details are uncertain, use the best-known commonly reported estimate.
 
-Scoring scale for all other attributes:
+Scoring scale for all other attributes. Use decimals when needed (e.g., 7.5):
 - 1 to 2 = very poor
 - 3 to 4 = below average
 - 5 = average professional level
