@@ -92,12 +92,12 @@ CREATE TABLE IF NOT EXISTS prediction_history (
 
                                                   CONSTRAINT chk_match_winner CHECK (
                                                       match_winner IS NULL
-                                                          OR match_winner IN ('BOXER_A', 'BOXER_B', 'DRAW', 'NO_CONTEST')
+                                                          OR match_winner IN ('BOXER_A', 'BOXER_B', 'DRAW')
                                                       ),
 
                                                   CONSTRAINT chk_match_method CHECK (
                                                       match_win_method IS NULL
-                                                          OR match_win_method IN ('KO', 'TKO', 'DECISION', 'DISQUALIFICATION', 'NO_CONTEST')
+                                                          OR match_win_method IN ('KO', 'TKO', 'DECISION', 'DISQUALIFICATION')
                                                       ),
 
                                                   CONSTRAINT chk_match_winner_method_consistency CHECK (

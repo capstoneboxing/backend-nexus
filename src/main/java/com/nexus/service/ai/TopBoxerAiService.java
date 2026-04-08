@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class TopBoxerAiService {
 
-    private static final boolean USE_FULL_RUBRIC = false;
+    private static final boolean USE_FULL_RUBRIC = true;
 
     private static final String BASE_INSTRUCTIONS = """
 You are a boxing analytics evaluator.
