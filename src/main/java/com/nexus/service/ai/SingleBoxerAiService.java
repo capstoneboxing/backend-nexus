@@ -426,7 +426,7 @@ JSON format:
                 BASE_INSTRUCTIONS,
                 boxerName,
                 weightClassName,
-                FULL_RUBRIC.formatted(weightClassName),
+                SHORT_RUBRIC.formatted(weightClassName),
                 JSON_SCHEMA
         );
     }
