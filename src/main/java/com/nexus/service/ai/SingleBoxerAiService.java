@@ -95,9 +95,9 @@ Confidence rules:
 
 Important scoring rules:
 - All attributes below use the 1.0–10.0 scale unless stated otherwise.
+- Use decimals when needed (e.g., 7.5).
 - heightCm and reachCm are raw measurements in centimeters.
 - winRatio and knockoutRatio are raw decimal ratios (0.0–1.0).
-- Use decimals when needed (e.g., 7.5).
 
 Physical attribute rubrics:
 weightClassAlignment:

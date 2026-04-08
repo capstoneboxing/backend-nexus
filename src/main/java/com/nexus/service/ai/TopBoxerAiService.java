@@ -70,7 +70,6 @@ Core rules:
 - Score each boxer relative to the standards of the %s division.
 - Be internally consistent across all %d fighters.
 - Avoid giving too many 10.0 scores unless truly justified.
-- Use decimals if needed, for example 7.5.
 
 Measurement rules:
 - heightCm and reachCm are raw physical measurements in centimeters, not rubric scores.
@@ -96,9 +95,9 @@ Scoring standard:
 
 Important scoring rules:
 - All attributes below use the 1.0–10.0 scale unless stated otherwise.
+- Use decimals when needed (e.g., 7.5).
 - heightCm and reachCm are raw measurements in centimeters.
 - winRatio and knockoutRatio are raw decimal ratios (0.0–1.0).
-- Use decimals when needed (e.g., 7.5).
 
 Physical attribute rubrics:
 weightClassAlignment:
