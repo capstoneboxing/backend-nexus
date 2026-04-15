@@ -1,10 +1,13 @@
 package com.nexus.dto.prediction;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record BoxerInput(
         @NotBlank String boxerName,
+        @NotNull @DecimalMin("0.0") @DecimalMax("1.0") Double attributeConfidence,
 
         @NotNull Double heightCm,
         @NotNull Double reachCm,

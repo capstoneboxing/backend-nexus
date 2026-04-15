@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 @Schema(description = "Request to generate a boxer profile using AI for a given boxer name and weight class")
-public record GenerateBoxerProfileRequest(
+public record GenerateBoxerRequest(
 
         @Schema(
                 description = "Name of the boxer to generate a profile for",

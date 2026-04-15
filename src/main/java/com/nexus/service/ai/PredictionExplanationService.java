@@ -21,8 +21,10 @@ public class PredictionExplanationService {
             BoxerInput boxerB,
             CategoryScores scoresA,
             CategoryScores scoresB,
-            double closenessA,
-            double closenessB,
+            double baseClosenessA,
+            double baseClosenessB,
+            double adjustedClosenessA,
+            double adjustedClosenessB,
             double probabilityA,
             double probabilityB,
             CategoryWeight weights
@@ -47,7 +49,9 @@ Boxer A category scores:
 - Tactical: %.4f
 - Psychological: %.4f
 - Experience: %.4f
-Boxer A closeness to perfect boxer: %.4f
+Boxer A base closeness to perfect boxer: %.4f
+Boxer A attribute confidence: %.4f
+Boxer A adjusted closeness used for prediction: %.4f
 Boxer A win probability: %.4f
 
 Boxer B: %s
@@ -57,12 +61,15 @@ Boxer B category scores:
 - Tactical: %.4f
 - Psychological: %.4f
 - Experience: %.4f
-Boxer B closeness to perfect boxer: %.4f
+Boxer B base closeness to perfect boxer: %.4f
+Boxer B attribute confidence: %.4f
+Boxer B adjusted closeness used for prediction: %.4f
 Boxer B win probability: %.4f
 
 Instructions:
 - Write a concise explanation in plain English.
 - Explain which categories most likely gave the predicted winner the edge.
+- If relevant, mention whether attribute confidence strengthened or reduced certainty.
 - Mention if the result is narrow or clear.
 - Do not invent statistics or facts not provided.
 - Do not mention raw attribute values.
@@ -84,7 +91,9 @@ Instructions:
                         scoresA.tactical(),
                         scoresA.psychological(),
                         scoresA.experience(),
-                        closenessA,
+                        baseClosenessA,
+                        boxerA.attributeConfidence(),
+                        adjustedClosenessA,
                         probabilityA,
 
                         boxerB.boxerName(),
@@ -93,7 +102,9 @@ Instructions:
                         scoresB.tactical(),
                         scoresB.psychological(),
                         scoresB.experience(),
-                        closenessB,
+                        baseClosenessB,
+                        boxerB.attributeConfidence(),
+                        adjustedClosenessB,
                         probabilityB
                 );
 

@@ -194,7 +194,7 @@ public class AllTimeRankedBoxerController {
     }
 
     @Operation(
-            summary = "Generate boxer profile with AI",
+            summary = "Generate boxer with AI",
             description = "Generates a boxer attribute profile for a boxer name and weight class using AI. Requires a valid Bearer JWT."
     )
     @ApiResponses({
@@ -231,10 +231,10 @@ public class AllTimeRankedBoxerController {
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             )
     })
-    @PostMapping("/generate-profile")
-    public ResponseEntity<GeneratedBoxerProfileResponse> generateProfile(@Valid @RequestBody GenerateBoxerProfileRequest request) {
+    @PostMapping("/generate-boxer")
+    public ResponseEntity<GeneratedBoxerResponse> generateBoxer(@Valid @RequestBody GenerateBoxerRequest request) {
         return ResponseEntity.ok(
-                rankedBoxerService.generateBoxerProfile(
+                rankedBoxerService.generateBoxer(
                         request.boxerName(),
                         request.weightClassId()
                 )

@@ -5,7 +5,7 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 
 @Schema(description = "Response containing an AI-generated boxer profile with evaluated attributes across physical, technical, tactical, psychological, and performance categories")
-public record GeneratedBoxerProfileResponse(
+public record GeneratedBoxerResponse(
         @Schema(
                 description = "Indicates whether the AI successfully identified the boxer",
                 example = "true"

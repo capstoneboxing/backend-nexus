@@ -90,8 +90,18 @@ public class MatchPredictionService {
         double overallScoreB = scoringService.overallScore(scoresB);
         double overallPerfectScore = scoringService.overallScore(perfectScores);
 
-        double closenessA = scoringService.closeness(scoresA, perfectScores, weights);
-        double closenessB = scoringService.closeness(scoresB, perfectScores, weights);
+        double baseClosenessA = scoringService.closeness(scoresA, perfectScores, weights);
+        double baseClosenessB = scoringService.closeness(scoresB, perfectScores, weights);
+
+        double closenessA = scoringService.applyAttributeConfidence(
+                baseClosenessA,
+                request.boxerA().attributeConfidence()
+        );
+
+        double closenessB = scoringService.applyAttributeConfidence(
+                baseClosenessB,
+                request.boxerB().attributeConfidence()
+        );
 
         double probabilityA = scoringService.probability(closenessA, closenessB);
         double probabilityB = AppUtils.roundTo2DecimalPlaces(1.0 - probabilityA);
@@ -113,6 +123,8 @@ public class MatchPredictionService {
                 request.boxerB(),
                 scoresA,
                 scoresB,
+                baseClosenessA,
+                baseClosenessB,
                 closenessA,
                 closenessB,
                 probabilityA,
@@ -127,6 +139,10 @@ public class MatchPredictionService {
                 overallScoreA,
                 overallScoreB,
                 overallPerfectScore,
+                request.boxerA().attributeConfidence(),
+                request.boxerB().attributeConfidence(),
+                baseClosenessA,
+                baseClosenessB,
                 closenessA,
                 closenessB,
                 probabilityA,
@@ -179,6 +195,10 @@ public class MatchPredictionService {
             double overallScoreA,
             double overallScoreB,
             double overallPerfectScore,
+            double attributeConfidenceA,
+            double attributeConfidenceB,
+            double baseClosenessA,
+            double baseClosenessB,
             double closenessA,
             double closenessB,
             double probabilityA,
@@ -196,9 +216,20 @@ public class MatchPredictionService {
                 "perfectBoxer", overallPerfectScore
         ));
 
+        snapshot.put("attributeConfidence", Map.of(
+                "boxerA", attributeConfidenceA,
+                "boxerB", attributeConfidenceB
+        ));
+
         snapshot.put("closeness", Map.of(
-                "boxerA", closenessA,
-                "boxerB", closenessB
+                "boxerA", Map.of(
+                        "base", baseClosenessA,
+                        "adjusted", closenessA
+                ),
+                "boxerB", Map.of(
+                        "base", baseClosenessB,
+                        "adjusted", closenessB
+                )
         ));
 
         snapshot.put("probabilities", Map.of(

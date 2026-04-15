@@ -56,8 +56,9 @@ Attribute groups:
 
 Confidence rules:
 - confidence must be from 0.0 to 1.0.
-- If unsure, lower confidence.
-- If the boxer name is nonsense, ambiguous, fictional, or not credibly identifiable for this weight-class context, set boxerFound to false.
+- confidence represents how certain you are that the identified boxer is correct.
+- Lower confidence if there is ambiguity or uncertainty.
+- boxerFound should only be false if the boxer cannot be credibly identified at all.
 """;
 
     private static final String FULL_RUBRIC = """
@@ -90,8 +91,9 @@ Scoring standard:
 
 Confidence rules:
 - confidence must be from 0.0 to 1.0.
-- If unsure, lower confidence.
-- If the boxer name is nonsense, ambiguous, fictional, or not credibly identifiable for this weight-class context, set boxerFound to false.
+- confidence represents how certain you are that the identified boxer is correct.
+- Lower confidence if there is ambiguity or uncertainty.
+- boxerFound should only be false if the boxer cannot be credibly identified at all.
 
 Important scoring rules:
 - All attributes below use the 1.0–10.0 scale unless stated otherwise.
@@ -401,17 +403,24 @@ Task:
 Try to identify the boxer named "%s" in the context of the %s division and generate a boxing analytics profile.
 
 Decision rules:
-- If the boxer is not credibly identifiable, return:
+- Determine whether the boxer is a real, identifiable professional boxer relevant to this weight class.
+
+- If the boxer is clearly real and identifiable:
+  - "boxerFound": true
+  - "confidence": a value from 0.0 to 1.0 representing how confident you are in the identification
+  - "matchReason": short explanation of who the boxer is and why the match is credible
+  - "boxer": full profile
+
+- If the boxer cannot be identified (e.g., nonsense name, fictional, highly ambiguous, or no credible match):
   - "boxerFound": false
-  - "confidence": below 0.75
+  - "confidence": a value from 0.0 to 1.0 representing uncertainty
   - "matchReason": short explanation
   - "boxer": null
 
-- If the boxer is credibly identifiable, return:
-  - "boxerFound": true
-  - "confidence": from 0.75 to 1.0
-  - "matchReason": short explanation of who the boxer is and why the match is credible
-  - "boxer": full profile
+Important:
+- Do NOT force confidence into any range based on boxerFound.
+- A boxer can be found (boxerFound = true) even with moderate confidence (e.g., 0.5–0.7).
+- Only return boxerFound = false if the boxer truly cannot be identified.
 
 Profile rules:
 - boxerName must match the identified boxer.

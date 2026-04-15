@@ -3,7 +3,7 @@ package com.nexus.service;
 import com.nexus.dto.allTimeRankedBoxer.AllTimeRankedBoxerResponse;
 import com.nexus.dto.allTimeRankedBoxer.AllTimeRankedBoxerUpdateRequest;
 import com.nexus.dto.allTimeRankedBoxer.AllTimeRankedBoxerWithBatchStatusResponse;
-import com.nexus.dto.allTimeRankedBoxer.GeneratedBoxerProfileResponse;
+import com.nexus.dto.allTimeRankedBoxer.GeneratedBoxerResponse;
 import com.nexus.exception.BoxerProfileLookupException;
 import com.nexus.exception.ResourceNotFoundException;
 import com.nexus.mapper.AllTimeRankedBoxerMapper;
@@ -24,8 +24,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class AllTimeRankedBoxerService {
-    private static final double MIN_BOXER_PROFILE_CONFIDENCE = 0.75;
-
     private final AllTimeRankedBoxerRepository rankedBoxerRepository;
     private final PerfectBoxerGenerationBatchRepository batchRepository;
     private final WeightClassRepository weightClassRepository;
@@ -45,8 +43,6 @@ public class AllTimeRankedBoxerService {
         this.singleBoxerAiService = singleBoxerAiService;
         this.allTimeRankedBoxerMapper = allTimeRankedBoxerMapper;
     }
-
-
 
     public AllTimeRankedBoxerResponse findById(Integer id) {
         AllTimeRankedBoxer boxer = rankedBoxerRepository.findById(id)
@@ -169,7 +165,7 @@ public class AllTimeRankedBoxerService {
         return allTimeRankedBoxerMapper.toResponse(saved);
     }
 
-    public GeneratedBoxerProfileResponse generateBoxerProfile(String boxerName, Integer weightClassId) {
+    public GeneratedBoxerResponse generateBoxer(String boxerName, Integer weightClassId) {
         WeightClass weightClass = weightClassRepository.findById(weightClassId)
                 .orElseThrow(() -> new ResourceNotFoundException("Weight class not found: " + weightClassId));
 
@@ -179,7 +175,7 @@ public class AllTimeRankedBoxerService {
         double confidence = aiResponse.getConfidence() != null ? aiResponse.getConfidence() : 0.0;
         String matchReason = aiResponse.getMatchReason();
 
-        if (!boxerFound || confidence < MIN_BOXER_PROFILE_CONFIDENCE || aiResponse.getBoxer() == null) {
+        if (!boxerFound || aiResponse.getBoxer() == null) {
             throw new BoxerProfileLookupException(
                     "AI could not confidently identify boxer '" + boxerName +
                             "' for weight class '" + weightClass.getClassName() +
@@ -190,7 +186,7 @@ public class AllTimeRankedBoxerService {
 
         var boxer = aiResponse.getBoxer();
 
-        return new GeneratedBoxerProfileResponse(
+        return new GeneratedBoxerResponse(
                 true,
                 confidence,
                 matchReason,

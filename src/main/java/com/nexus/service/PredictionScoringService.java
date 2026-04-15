@@ -31,46 +31,46 @@ public class PredictionScoringService {
         double experienceAttributeWeight = weights.getExperienceWeight() / 6.0;
 
         double physical =
-                physicalAttributeWeight * m(boxer.heightCm(), ranges.get("heightCm")) +
-                        physicalAttributeWeight * m(boxer.reachCm(), ranges.get("reachCm")) +
-                        physicalAttributeWeight * s(boxer.weightClassAlignment()) +
-                        physicalAttributeWeight * s(boxer.handSpeed()) +
-                        physicalAttributeWeight * s(boxer.footSpeed()) +
-                        physicalAttributeWeight * s(boxer.strength()) +
-                        physicalAttributeWeight * s(boxer.endurance()) +
-                        physicalAttributeWeight * s(boxer.reactionTime());
+                physicalAttributeWeight * normalizeMeasurement(boxer.heightCm(), ranges.get("heightCm")) +
+                        physicalAttributeWeight * normalizeMeasurement(boxer.reachCm(), ranges.get("reachCm")) +
+                        physicalAttributeWeight * normalizeScore(boxer.weightClassAlignment()) +
+                        physicalAttributeWeight * normalizeScore(boxer.handSpeed()) +
+                        physicalAttributeWeight * normalizeScore(boxer.footSpeed()) +
+                        physicalAttributeWeight * normalizeScore(boxer.strength()) +
+                        physicalAttributeWeight * normalizeScore(boxer.endurance()) +
+                        physicalAttributeWeight * normalizeScore(boxer.reactionTime());
 
         double technical =
-                technicalAttributeWeight * s(boxer.punchAccuracy()) +
-                        technicalAttributeWeight * s(boxer.punchVariety()) +
-                        technicalAttributeWeight * s(boxer.defensiveGuardEfficiency()) +
-                        technicalAttributeWeight * s(boxer.headMovement()) +
-                        technicalAttributeWeight * s(boxer.footworkTechnique()) +
-                        technicalAttributeWeight * s(boxer.counterpunchingAbility()) +
-                        technicalAttributeWeight * s(boxer.combinationEfficiency());
+                technicalAttributeWeight * normalizeScore(boxer.punchAccuracy()) +
+                        technicalAttributeWeight * normalizeScore(boxer.punchVariety()) +
+                        technicalAttributeWeight * normalizeScore(boxer.defensiveGuardEfficiency()) +
+                        technicalAttributeWeight * normalizeScore(boxer.headMovement()) +
+                        technicalAttributeWeight * normalizeScore(boxer.footworkTechnique()) +
+                        technicalAttributeWeight * normalizeScore(boxer.counterpunchingAbility()) +
+                        technicalAttributeWeight * normalizeScore(boxer.combinationEfficiency());
 
         double tactical =
-                tacticalAttributeWeight * s(boxer.ringIq()) +
-                        tacticalAttributeWeight * s(boxer.adaptabilityMidFight()) +
-                        tacticalAttributeWeight * s(boxer.distanceControl()) +
-                        tacticalAttributeWeight * s(boxer.tempoControl()) +
-                        tacticalAttributeWeight * s(boxer.opponentPatternRecognition()) +
-                        tacticalAttributeWeight * s(boxer.fightPlanningDiscipline());
+                tacticalAttributeWeight * normalizeScore(boxer.ringIq()) +
+                        tacticalAttributeWeight * normalizeScore(boxer.adaptabilityMidFight()) +
+                        tacticalAttributeWeight * normalizeScore(boxer.distanceControl()) +
+                        tacticalAttributeWeight * normalizeScore(boxer.tempoControl()) +
+                        tacticalAttributeWeight * normalizeScore(boxer.opponentPatternRecognition()) +
+                        tacticalAttributeWeight * normalizeScore(boxer.fightPlanningDiscipline());
 
         double psychological =
-                psychologicalAttributeWeight * s(boxer.composureUnderPressure()) +
-                        psychologicalAttributeWeight * s(boxer.aggressionControl()) +
-                        psychologicalAttributeWeight * s(boxer.mentalToughness()) +
-                        psychologicalAttributeWeight * s(boxer.focusConsistency()) +
-                        psychologicalAttributeWeight * s(boxer.resilienceAfterKnockdown());
+                psychologicalAttributeWeight * normalizeScore(boxer.composureUnderPressure()) +
+                        psychologicalAttributeWeight * normalizeScore(boxer.aggressionControl()) +
+                        psychologicalAttributeWeight * normalizeScore(boxer.mentalToughness()) +
+                        psychologicalAttributeWeight * normalizeScore(boxer.focusConsistency()) +
+                        psychologicalAttributeWeight * normalizeScore(boxer.resilienceAfterKnockdown());
 
         double experience =
-                experienceAttributeWeight * r(boxer.winRatio()) +
-                        experienceAttributeWeight * r(boxer.knockoutRatio()) +
-                        experienceAttributeWeight * s(boxer.titleFightExperience()) +
-                        experienceAttributeWeight * s(boxer.strengthOfOpposition()) +
-                        experienceAttributeWeight * s(boxer.recentFightActivity()) +
-                        experienceAttributeWeight * s(boxer.performanceConsistency());
+                experienceAttributeWeight * normalizeRatio(boxer.winRatio()) +
+                        experienceAttributeWeight * normalizeRatio(boxer.knockoutRatio()) +
+                        experienceAttributeWeight * normalizeScore(boxer.titleFightExperience()) +
+                        experienceAttributeWeight * normalizeScore(boxer.strengthOfOpposition()) +
+                        experienceAttributeWeight * normalizeScore(boxer.recentFightActivity()) +
+                        experienceAttributeWeight * normalizeScore(boxer.performanceConsistency());
 
         physical = AppUtils.roundTo2DecimalPlaces(physical);
         technical = AppUtils.roundTo2DecimalPlaces(technical);
@@ -93,46 +93,46 @@ public class PredictionScoringService {
         double experienceAttributeWeight = weights.getExperienceWeight() / 6.0;
 
         double physical =
-                physicalAttributeWeight * m(boxer.getHeightCm(), ranges.get("heightCm")) +
-                        physicalAttributeWeight * m(boxer.getReachCm(), ranges.get("reachCm")) +
-                        physicalAttributeWeight * s(boxer.getWeightClassAlignment()) +
-                        physicalAttributeWeight * s(boxer.getHandSpeed()) +
-                        physicalAttributeWeight * s(boxer.getFootSpeed()) +
-                        physicalAttributeWeight * s(boxer.getStrength()) +
-                        physicalAttributeWeight * s(boxer.getEndurance()) +
-                        physicalAttributeWeight * s(boxer.getReactionTime());
+                physicalAttributeWeight * normalizeMeasurement(boxer.getHeightCm(), ranges.get("heightCm")) +
+                        physicalAttributeWeight * normalizeMeasurement(boxer.getReachCm(), ranges.get("reachCm")) +
+                        physicalAttributeWeight * normalizeScore(boxer.getWeightClassAlignment()) +
+                        physicalAttributeWeight * normalizeScore(boxer.getHandSpeed()) +
+                        physicalAttributeWeight * normalizeScore(boxer.getFootSpeed()) +
+                        physicalAttributeWeight * normalizeScore(boxer.getStrength()) +
+                        physicalAttributeWeight * normalizeScore(boxer.getEndurance()) +
+                        physicalAttributeWeight * normalizeScore(boxer.getReactionTime());
 
         double technical =
-                technicalAttributeWeight * s(boxer.getPunchAccuracy()) +
-                        technicalAttributeWeight * s(boxer.getPunchVariety()) +
-                        technicalAttributeWeight * s(boxer.getDefensiveGuardEfficiency()) +
-                        technicalAttributeWeight * s(boxer.getHeadMovement()) +
-                        technicalAttributeWeight * s(boxer.getFootworkTechnique()) +
-                        technicalAttributeWeight * s(boxer.getCounterpunchingAbility()) +
-                        technicalAttributeWeight * s(boxer.getCombinationEfficiency());
+                technicalAttributeWeight * normalizeScore(boxer.getPunchAccuracy()) +
+                        technicalAttributeWeight * normalizeScore(boxer.getPunchVariety()) +
+                        technicalAttributeWeight * normalizeScore(boxer.getDefensiveGuardEfficiency()) +
+                        technicalAttributeWeight * normalizeScore(boxer.getHeadMovement()) +
+                        technicalAttributeWeight * normalizeScore(boxer.getFootworkTechnique()) +
+                        technicalAttributeWeight * normalizeScore(boxer.getCounterpunchingAbility()) +
+                        technicalAttributeWeight * normalizeScore(boxer.getCombinationEfficiency());
 
         double tactical =
-                tacticalAttributeWeight * s(boxer.getRingIq()) +
-                        tacticalAttributeWeight * s(boxer.getAdaptabilityMidFight()) +
-                        tacticalAttributeWeight * s(boxer.getDistanceControl()) +
-                        tacticalAttributeWeight * s(boxer.getTempoControl()) +
-                        tacticalAttributeWeight * s(boxer.getOpponentPatternRecognition()) +
-                        tacticalAttributeWeight * s(boxer.getFightPlanningDiscipline());
+                tacticalAttributeWeight * normalizeScore(boxer.getRingIq()) +
+                        tacticalAttributeWeight * normalizeScore(boxer.getAdaptabilityMidFight()) +
+                        tacticalAttributeWeight * normalizeScore(boxer.getDistanceControl()) +
+                        tacticalAttributeWeight * normalizeScore(boxer.getTempoControl()) +
+                        tacticalAttributeWeight * normalizeScore(boxer.getOpponentPatternRecognition()) +
+                        tacticalAttributeWeight * normalizeScore(boxer.getFightPlanningDiscipline());
 
         double psychological =
-                psychologicalAttributeWeight * s(boxer.getComposureUnderPressure()) +
-                        psychologicalAttributeWeight * s(boxer.getAggressionControl()) +
-                        psychologicalAttributeWeight * s(boxer.getMentalToughness()) +
-                        psychologicalAttributeWeight * s(boxer.getFocusConsistency()) +
-                        psychologicalAttributeWeight * s(boxer.getResilienceAfterKnockdown());
+                psychologicalAttributeWeight * normalizeScore(boxer.getComposureUnderPressure()) +
+                        psychologicalAttributeWeight * normalizeScore(boxer.getAggressionControl()) +
+                        psychologicalAttributeWeight * normalizeScore(boxer.getMentalToughness()) +
+                        psychologicalAttributeWeight * normalizeScore(boxer.getFocusConsistency()) +
+                        psychologicalAttributeWeight * normalizeScore(boxer.getResilienceAfterKnockdown());
 
         double experience =
-                experienceAttributeWeight * r(boxer.getWinRatio()) +
-                        experienceAttributeWeight * r(boxer.getKnockoutRatio()) +
-                        experienceAttributeWeight * s(boxer.getTitleFightExperience()) +
-                        experienceAttributeWeight * s(boxer.getStrengthOfOpposition()) +
-                        experienceAttributeWeight * s(boxer.getRecentFightActivity()) +
-                        experienceAttributeWeight * s(boxer.getPerformanceConsistency());
+                experienceAttributeWeight * normalizeRatio(boxer.getWinRatio()) +
+                        experienceAttributeWeight * normalizeRatio(boxer.getKnockoutRatio()) +
+                        experienceAttributeWeight * normalizeScore(boxer.getTitleFightExperience()) +
+                        experienceAttributeWeight * normalizeScore(boxer.getStrengthOfOpposition()) +
+                        experienceAttributeWeight * normalizeScore(boxer.getRecentFightActivity()) +
+                        experienceAttributeWeight * normalizeScore(boxer.getPerformanceConsistency());
 
         physical = AppUtils.roundTo2DecimalPlaces(physical);
         technical = AppUtils.roundTo2DecimalPlaces(technical);
@@ -193,15 +193,21 @@ public class PredictionScoringService {
         return AppUtils.roundTo2DecimalPlaces(adjustedA / total);
     }
 
-    private double m(Double value, AttributeRange range) {
+    private double normalizeMeasurement(Double value, AttributeRange range) {
         return normalizationService.normalizeMeasurement(value, range);
     }
 
-    private double s(Double value) {
+    private double normalizeScore(Double value) {
         return normalizationService.normalizeRubricScore(value);
     }
 
-    private double r(Double value) {
+    private double normalizeRatio(Double value) {
         return normalizationService.normalizeRatio(value);
+    }
+
+    public double applyAttributeConfidence(double baseCloseness, double attributeConfidence) {
+        double confidence = Math.clamp(attributeConfidence, 0.0, 1.0);
+        double adjusted = 0.5 + confidence * (baseCloseness - 0.5);
+        return AppUtils.roundTo2DecimalPlaces(Math.clamp(adjusted, 0.0, 1.0));
     }
 }
