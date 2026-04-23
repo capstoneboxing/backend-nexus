@@ -6,6 +6,7 @@ import com.nexus.dto.prediction.CategoryScores;
 import com.nexus.model.CategoryWeight;
 import com.nexus.model.PerfectBoxer;
 import com.nexus.util.AppUtils;
+import com.nexus.util.CategoryAttributeWeights;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -14,6 +15,12 @@ import java.util.Map;
 public class PredictionScoringService {
 
     private final PredictionNormalizationService normalizationService;
+
+    private static final double TOTAL_PHYSICAL_ATTRIBUTES = 8.0;
+    private static final double TOTAL_TECHNICAL_ATTRIBUTES = 7.0;
+    private static final double TOTAL_TACTICAL_ATTRIBUTES = 6.0;
+    private static final double TOTAL_PSYCHOLOGICAL_ATTRIBUTES = 5.0;
+    private static final double TOTAL_EXPERIENCE_ATTRIBUTES = 6.0;
 
     public PredictionScoringService(PredictionNormalizationService normalizationService) {
         this.normalizationService = normalizationService;
@@ -24,11 +31,14 @@ public class PredictionScoringService {
             Map<String, AttributeRange> ranges,
             CategoryWeight weights
     ) {
-        double physicalAttributeWeight = weights.getPhysicalWeight() / 8.0;
-        double technicalAttributeWeight = weights.getTechnicalWeight() / 7.0;
-        double tacticalAttributeWeight = weights.getTacticalWeight() / 6.0;
-        double psychologicalAttributeWeight = weights.getPsychologicalWeight() / 5.0;
-        double experienceAttributeWeight = weights.getExperienceWeight() / 6.0;
+
+        CategoryAttributeWeights categoryAttributeWeights = computeAttributeWeights(weights);
+
+        double physicalAttributeWeight = categoryAttributeWeights.physical();
+        double technicalAttributeWeight = categoryAttributeWeights.technical();
+        double tacticalAttributeWeight = categoryAttributeWeights.tactical();
+        double psychologicalAttributeWeight = categoryAttributeWeights.psychological();
+        double experienceAttributeWeight = categoryAttributeWeights.experience();
 
         double physical =
                 physicalAttributeWeight * normalizeMeasurement(boxer.heightCm(), ranges.get("heightCm")) +
@@ -72,13 +82,7 @@ public class PredictionScoringService {
                         experienceAttributeWeight * normalizeScore(boxer.recentFightActivity()) +
                         experienceAttributeWeight * normalizeScore(boxer.performanceConsistency());
 
-        physical = AppUtils.roundTo2DecimalPlaces(physical);
-        technical = AppUtils.roundTo2DecimalPlaces(technical);
-        tactical = AppUtils.roundTo2DecimalPlaces(tactical);
-        psychological = AppUtils.roundTo2DecimalPlaces(psychological);
-        experience = AppUtils.roundTo2DecimalPlaces(experience);
-
-        return new CategoryScores(physical, technical, tactical, psychological, experience);
+        return roundScores(physical, technical, tactical, psychological, experience);
     }
 
     public CategoryScores scorePerfectBoxer(
@@ -86,11 +90,13 @@ public class PredictionScoringService {
             Map<String, AttributeRange> ranges,
             CategoryWeight weights
     ) {
-        double physicalAttributeWeight = weights.getPhysicalWeight() / 8.0;
-        double technicalAttributeWeight = weights.getTechnicalWeight() / 7.0;
-        double tacticalAttributeWeight = weights.getTacticalWeight() / 6.0;
-        double psychologicalAttributeWeight = weights.getPsychologicalWeight() / 5.0;
-        double experienceAttributeWeight = weights.getExperienceWeight() / 6.0;
+        CategoryAttributeWeights categoryAttributeWeights = computeAttributeWeights(weights);
+
+        double physicalAttributeWeight = categoryAttributeWeights.physical();
+        double technicalAttributeWeight = categoryAttributeWeights.technical();
+        double tacticalAttributeWeight = categoryAttributeWeights.tactical();
+        double psychologicalAttributeWeight = categoryAttributeWeights.psychological();
+        double experienceAttributeWeight = categoryAttributeWeights.experience();
 
         double physical =
                 physicalAttributeWeight * normalizeMeasurement(boxer.getHeightCm(), ranges.get("heightCm")) +
@@ -134,13 +140,33 @@ public class PredictionScoringService {
                         experienceAttributeWeight * normalizeScore(boxer.getRecentFightActivity()) +
                         experienceAttributeWeight * normalizeScore(boxer.getPerformanceConsistency());
 
-        physical = AppUtils.roundTo2DecimalPlaces(physical);
-        technical = AppUtils.roundTo2DecimalPlaces(technical);
-        tactical = AppUtils.roundTo2DecimalPlaces(tactical);
-        psychological = AppUtils.roundTo2DecimalPlaces(psychological);
-        experience = AppUtils.roundTo2DecimalPlaces(experience);
+        return roundScores(physical, technical, tactical, psychological, experience);
+    }
 
-        return new CategoryScores(physical, technical, tactical, psychological, experience);
+    private CategoryAttributeWeights computeAttributeWeights(CategoryWeight weights) {
+        return new CategoryAttributeWeights(
+                weights.getPhysicalWeight() / TOTAL_PHYSICAL_ATTRIBUTES,
+                weights.getTechnicalWeight() / TOTAL_TECHNICAL_ATTRIBUTES,
+                weights.getTacticalWeight() / TOTAL_TACTICAL_ATTRIBUTES,
+                weights.getPsychologicalWeight() / TOTAL_PSYCHOLOGICAL_ATTRIBUTES,
+                weights.getExperienceWeight() / TOTAL_EXPERIENCE_ATTRIBUTES
+        );
+    }
+
+    private CategoryScores roundScores(
+            double physical,
+            double technical,
+            double tactical,
+            double psychological,
+            double experience
+    ) {
+        return new CategoryScores(
+                AppUtils.roundTo2DecimalPlaces(physical),
+                AppUtils.roundTo2DecimalPlaces(technical),
+                AppUtils.roundTo2DecimalPlaces(tactical),
+                AppUtils.roundTo2DecimalPlaces(psychological),
+                AppUtils.roundTo2DecimalPlaces(experience)
+        );
     }
 
     public double overallScore(CategoryScores scores) {
