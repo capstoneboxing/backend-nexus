@@ -40,22 +40,77 @@ public class PredictionSeedRunner {
             return;
         }
 
-        // simple guard so it does not run repeatedly
         if (predictionHistoryRepository.count() > 0) {
             System.out.println("[PredictionSeedRunner] Prediction history already has data. Skipping seed.");
             return;
         }
 
         List<SeedFight> fights = List.of(
-                // --- Welterweight (11) examples ---
-                new SeedFight(11, "Floyd Mayweather Jr", "Manny Pacquiao", "BOXER_A", "DECISION"),
-                new SeedFight(11, "Sugar Ray Leonard", "Thomas Hearns", "BOXER_A", "TKO"),
-                new SeedFight(11, "Manny Pacquiao", "Miguel Cotto", "BOXER_A", "TKO"),
+                // --- Minimumweight (1) ---
+                new SeedFight(1, "Ricardo Lopez", "Hideyuki Ohashi", "BOXER_A", "TKO"),
+                new SeedFight(1, "Ricardo Lopez", "Rosendo Alvarez", "DRAW", "DECISION"),
 
-                // add the rest of your fights here...
-                // new SeedFight(weightClassId, boxerAName, boxerBName, actualWinner, actualMethod)
-                // 목표: 10 per weight class
-                new SeedFight(9, "Roberto Duran", "Sugar Ray Leonard", "BOXER_A", "DECISION")
+                // --- Light Flyweight (2) ---
+                new SeedFight(2, "Michael Carbajal", "Humberto Gonzalez", "BOXER_A", "KO"),
+                new SeedFight(2, "Humberto Gonzalez", "Michael Carbajal", "BOXER_A", "DECISION"),
+
+                // --- Flyweight (3) ---
+                new SeedFight(3, "Roman Gonzalez", "Akira Yaegashi", "BOXER_A", "TKO"),
+                new SeedFight(3, "Roman Gonzalez", "Brian Viloria", "BOXER_A", "TKO"),
+
+                // --- Super Flyweight (4) ---
+                new SeedFight(4, "Naoya Inoue", "Omar Narvaez", "BOXER_A", "TKO"),
+                new SeedFight(4, "Juan Francisco Estrada", "Roman Gonzalez", "BOXER_A", "DECISION"),
+
+                // --- Bantamweight (5) ---
+                new SeedFight(5, "Nonito Donaire", "Fernando Montiel", "BOXER_A", "KO"),
+                new SeedFight(5, "Naoya Inoue", "Nonito Donaire", "BOXER_A", "DECISION"),
+
+                // --- Super Bantamweight (6) ---
+                new SeedFight(6, "Murodjon Akhmadaliev", "Daniel Roman", "BOXER_A", "DECISION"),
+                new SeedFight(6, "Naoya Inoue", "Stephen Fulton", "BOXER_A", "TKO"),
+
+                // --- Featherweight (7) ---
+                new SeedFight(7, "Salvador Sanchez", "Wilfredo Gomez", "BOXER_A", "TKO"),
+                new SeedFight(7, "Manny Pacquiao", "Marco Antonio Barrera", "BOXER_A", "TKO"),
+
+                // --- Super Featherweight (8) ---
+                new SeedFight(8, "Floyd Mayweather Jr", "Genaro Hernandez", "BOXER_A", "TKO"),
+                new SeedFight(8, "Manny Pacquiao", "Juan Manuel Marquez", "DRAW", "DECISION"),
+
+                // --- Lightweight (9) ---
+                new SeedFight(9, "Floyd Mayweather Jr", "Jose Luis Castillo", "BOXER_A", "DECISION"),
+                new SeedFight(9, "Teofimo Lopez", "Vasiliy Lomachenko", "BOXER_A", "DECISION"),
+
+                // --- Super Lightweight (10) ---
+                new SeedFight(10, "Terence Crawford", "Viktor Postol", "BOXER_A", "DECISION"),
+                new SeedFight(10, "Josh Taylor", "Jose Ramirez", "BOXER_A", "DECISION"),
+
+                // --- Welterweight (11) ---
+                new SeedFight(11, "Floyd Mayweather Jr", "Manny Pacquiao", "BOXER_A", "DECISION"),
+                new SeedFight(11, "Terence Crawford", "Errol Spence Jr", "BOXER_A", "TKO"),
+
+                // --- Super Welterweight (12) ---
+                new SeedFight(12, "Floyd Mayweather Jr", "Canelo Alvarez", "BOXER_A", "DECISION"),
+                new SeedFight(12, "Jermell Charlo", "Brian Castano", "DRAW", "DECISION"),
+
+                // --- Middleweight (13) ---
+                new SeedFight(13, "Gennady Golovkin", "David Lemieux", "BOXER_A", "TKO"),
+                new SeedFight(13, "Canelo Alvarez", "Gennady Golovkin", "BOXER_A", "DECISION"),
+
+                // --- Super Middleweight (14) ---
+                new SeedFight(14, "Andre Ward", "Carl Froch", "BOXER_A", "DECISION"),
+
+                // --- Light Heavyweight (15) ---
+                new SeedFight(15, "Roy Jones Jr", "Virgil Hill", "BOXER_A", "KO"),
+
+                // --- Cruiserweight (16) ---
+                new SeedFight(16, "Oleksandr Usyk", "Murat Gassiev", "BOXER_A", "DECISION"),
+                new SeedFight(16, "Tony Bellew", "Ilunga Makabu", "BOXER_A", "TKO"),
+
+                // --- Heavyweight (17) ---
+                new SeedFight(17, "Muhammad Ali", "George Foreman", "BOXER_A", "KO"),
+                new SeedFight(17, "Mike Tyson", "Trevor Berbick", "BOXER_A", "TKO")
         );
 
         int successCount = 0;
@@ -90,6 +145,13 @@ public class PredictionSeedRunner {
                 );
 
                 PredictionResponse response = matchPredictionService.predict(request);
+
+                predictionHistoryRepository.findById(response.predictionId())
+                        .ifPresent(history -> {
+                            history.setMatchWinner(fight.actualWinner());
+                            history.setMatchWinMethod(fight.actualMethod());
+                            predictionHistoryRepository.save(history);
+                        });
 
                 successCount++;
 
