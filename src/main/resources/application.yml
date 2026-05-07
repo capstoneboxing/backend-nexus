@@ -16,7 +16,7 @@ spring:
       maximum-pool-size: 3
       minimum-idle: 1
       idle-timeout: 30000
-      max-lifetime: 600000
+      max-lifetime: 300000
       connection-timeout: 30000
 
   sql:
@@ -28,13 +28,17 @@ spring:
       api-key: ${OPEN_AI_KEY}
 
 app:
-    jwt:
-      secret: ${JWT_SECRET}
-      expiration-ms: 86400000
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-ms: 86400000
 
-    seed:
-      predictions:
-        enabled: false
+  seed:
+    predictions:
+      enabled: false
+
+    perfect-boxers:
+      enabled: false
+      amount: 10
 
 admin:
   default:

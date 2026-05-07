@@ -15,11 +15,13 @@ import com.nexus.repository.PerfectBoxerGenerationBatchRepository;
 import com.nexus.repository.WeightClassRepository;
 import com.nexus.service.ai.SingleBoxerAiService;
 import com.nexus.util.AppUtils;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -226,5 +228,16 @@ public class AllTimeRankedBoxerService {
                 boxer.getPerformanceConsistency(),
                 boxer.getSourceNote()
         );
+    }
+
+    @Async("taskExecutor")
+    public CompletableFuture<GeneratedBoxerResponse> generateBoxerAsync(
+            String boxerName,
+            Integer weightClassId
+    ) {
+        GeneratedBoxerResponse response =
+                generateBoxer(boxerName, weightClassId);
+
+        return CompletableFuture.completedFuture(response);
     }
 }
