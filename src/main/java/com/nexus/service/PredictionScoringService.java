@@ -232,8 +232,19 @@ public class PredictionScoringService {
     }
 
     public double applyAttributeConfidence(double baseCloseness, double attributeConfidence) {
+
         double confidence = Math.clamp(attributeConfidence, 0.0, 1.0);
-        double adjusted = 0.5 + confidence * (baseCloseness - 0.5);
-        return AppUtils.roundTo2DecimalPlaces(Math.clamp(adjusted, 0.0, 1.0));
+        double confidencePenaltyStrength = 0.35;
+
+        double adjusted =
+                baseCloseness - (
+                        (1.0 - confidence)
+                                * confidencePenaltyStrength
+                                * (baseCloseness - 0.5)
+                );
+
+        return AppUtils.roundTo2DecimalPlaces(
+                Math.clamp(adjusted, 0.0, 1.0)
+        );
     }
 }

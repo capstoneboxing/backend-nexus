@@ -14,9 +14,10 @@ spring:
 
     hikari:
       maximum-pool-size: 3
-      minimum-idle: 1
-      idle-timeout: 30000
-      max-lifetime: 300000
+      minimum-idle: 0
+      max-lifetime: 120000
+      keepalive-time: 30000
+      validation-timeout: 5000
       connection-timeout: 30000
 
   sql:
@@ -33,12 +34,17 @@ app:
     expiration-ms: 86400000
 
   seed:
+    ranking-evaluation:
+      enabled: false
+
     predictions:
       enabled: false
 
     perfect-boxers:
       enabled: false
       amount: 10
+
+
 
 admin:
   default:
