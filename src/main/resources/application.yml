@@ -37,12 +37,10 @@ app:
     ranking-evaluation:
       enabled: false
 
-    predictions:
-      enabled: false
-
     perfect-boxers:
       enabled: false
       amount: 10
+      weight-class-ids: 7,11,13,14,17
 
 
 

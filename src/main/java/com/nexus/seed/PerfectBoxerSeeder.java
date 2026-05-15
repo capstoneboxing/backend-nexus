@@ -11,6 +11,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Component
 @Order(1)
 public class PerfectBoxerSeeder implements CommandLineRunner {
@@ -24,6 +27,9 @@ public class PerfectBoxerSeeder implements CommandLineRunner {
 
     @Value("${app.seed.perfect-boxers.amount:5}")
     private int amount;
+
+    @Value("${app.seed.perfect-boxers.weight-class-ids:}")
+    private String weightClassIds;
 
     public PerfectBoxerSeeder(
             WeightClassRepository weightClassRepository,
@@ -42,10 +48,22 @@ public class PerfectBoxerSeeder implements CommandLineRunner {
             return;
         }
 
-        System.out.println("Starting perfect boxer seeding...");
+        List<Integer> selectedWeightClassIds = parseWeightClassIds(weightClassIds);
 
-        for (WeightClass weightClass : weightClassRepository.findAll()) {
-            Integer weightClassId = weightClass.getWeightClassId();
+        if (selectedWeightClassIds.isEmpty()) {
+            System.out.println("No weight class IDs provided. Perfect boxer seeding skipped.");
+            return;
+        }
+
+        System.out.println("Starting perfect boxer seeding for weight classes: " + selectedWeightClassIds);
+
+        for (Integer weightClassId : selectedWeightClassIds) {
+            WeightClass weightClass = weightClassRepository.findById(weightClassId).orElse(null);
+
+            if (weightClass == null) {
+                System.out.println("Skipping invalid weight class ID: " + weightClassId);
+                continue;
+            }
 
             try {
                 System.out.println("Generating perfect boxer for weight class ID: " + weightClassId);
@@ -81,5 +99,18 @@ public class PerfectBoxerSeeder implements CommandLineRunner {
         }
 
         System.out.println("Perfect boxer seeding finished.");
+    }
+
+    private List<Integer> parseWeightClassIds(String value) {
+        if (value == null || value.isBlank()) {
+            return List.of();
+        }
+
+        return Arrays.stream(value.split(","))
+                .map(String::trim)
+                .filter(id -> !id.isBlank())
+                .map(Integer::parseInt)
+                .distinct()
+                .toList();
     }
 }

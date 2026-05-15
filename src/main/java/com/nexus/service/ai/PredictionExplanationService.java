@@ -44,27 +44,27 @@ Category weights:
 
 Boxer A: %s
 Boxer A category scores:
-- Physical: %.4f
-- Technical: %.4f
-- Tactical: %.4f
-- Psychological: %.4f
-- Experience: %.4f
-Boxer A base closeness to perfect boxer: %.4f
-Boxer A attribute confidence: %.4f
-Boxer A adjusted closeness used for prediction: %.4f
-Boxer A win probability: %.4f
+- Physical: %.2f
+- Technical: %.2f
+- Tactical: %.2f
+- Psychological: %.2f
+- Experience: %.2f
+Boxer A base closeness to perfect boxer: %.2f
+Boxer A attribute confidence: %.2f
+Boxer A adjusted closeness used for prediction: %.2f
+Boxer A win probability: %.2f
 
 Boxer B: %s
 Boxer B category scores:
-- Physical: %.4f
-- Technical: %.4f
-- Tactical: %.4f
-- Psychological: %.4f
-- Experience: %.4f
-Boxer B base closeness to perfect boxer: %.4f
-Boxer B attribute confidence: %.4f
-Boxer B adjusted closeness used for prediction: %.4f
-Boxer B win probability: %.4f
+- Physical: %.2f
+- Technical: %.2f
+- Tactical: %.2f
+- Psychological: %.2f
+- Experience: %.2f
+Boxer B base closeness to perfect boxer: %.2f
+Boxer B attribute confidence: %.2f
+Boxer B adjusted closeness used for prediction: %.2f
+Boxer B win probability: %.2f
 
 Instructions:
 - Write a concise explanation in plain English.

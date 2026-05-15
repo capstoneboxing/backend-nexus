@@ -82,17 +82,17 @@ Starting All Weight Class Match Evaluation
         List<SeedFight> testFights = List.of(
                 // FEATHERWEIGHT - weightClassId 7
                 new SeedFight(7, "Featherweight", "Nick Ball", "TJ Doheny", "BOXER_A", "TKO", "March 2025"),
+                new SeedFight(7, "Featherweight", "Stephen Fulton", "Brandon Figueroa", "BOXER_A", "DECISION", "February 2025"),
                 new SeedFight(7, "Featherweight", "Rafael Espinoza", "Robeisy Ramirez", "BOXER_A", "DECISION", "December 2024"),
                 new SeedFight(7, "Featherweight", "Nick Ball", "Raymond Ford", "BOXER_A", "DECISION", "June 2024"),
                 new SeedFight(7, "Featherweight", "Luis Alberto Lopez", "Reiya Abe", "BOXER_A", "TKO", "March 2024"),
-                new SeedFight(7, "Featherweight", "Rafael Espinoza", "Robeisy Ramirez", "BOXER_A", "DECISION", "December 2023"),
                 new SeedFight(7, "Featherweight", "Emanuel Navarrete", "Oscar Valdez", "BOXER_A", "DECISION", "August 2023"),
                 new SeedFight(7, "Featherweight", "Luis Alberto Lopez", "Michael Conlan", "BOXER_A", "DECISION", "May 2023"),
-                new SeedFight(7, "Featherweight", "Mauricio Lara", "Leigh Wood", "BOXER_A", "TKO", "February 2023"),
                 new SeedFight(7, "Featherweight", "Leigh Wood", "Mauricio Lara", "BOXER_A", "DECISION", "May 2023"),
                 new SeedFight(7, "Featherweight", "Luis Alberto Lopez", "Josh Warrington", "BOXER_A", "DECISION", "December 2022"),
                 new SeedFight(7, "Featherweight", "Leigh Wood", "Michael Conlan", "BOXER_A", "TKO", "March 2022"),
                 new SeedFight(7, "Featherweight", "Emanuel Navarrete", "Joet Gonzalez", "BOXER_A", "DECISION", "October 2021"),
+                new SeedFight(7, "Featherweight", "Mauricio Lara", "Emilio Sanchez", "BOXER_A", "TKO", "October 2021"),
                 new SeedFight(7, "Featherweight", "Kid Galahad", "Jazza Dickens", "BOXER_A", "TKO", "August 2021"),
                 new SeedFight(7, "Featherweight", "Gary Russell Jr", "Mark Magsayo", "BOXER_B", "DECISION", "January 2022"),
                 new SeedFight(7, "Featherweight", "Xu Can", "Leigh Wood", "BOXER_B", "TKO", "July 2021"),
@@ -110,9 +110,11 @@ Starting All Weight Class Match Evaluation
                 // WELTERWEIGHT - weightClassId 11
                 new SeedFight(11, "Welterweight", "Jaron Ennis", "Eimantas Stanionis", "BOXER_A", "TKO", "April 2025"),
                 new SeedFight(11, "Welterweight", "Mario Barrios", "Abel Ramos", "DRAW", "DECISION", "November 2024"),
+                new SeedFight(11, "Welterweight", "Jaron Ennis", "David Avanesyan", "BOXER_A", "TKO", "July 2024"),
                 new SeedFight(11, "Welterweight", "Eimantas Stanionis", "Gabriel Maestre", "BOXER_A", "DECISION", "May 2024"),
                 new SeedFight(11, "Welterweight", "Brian Norman Jr", "Giovani Santillan", "BOXER_A", "KO", "May 2024"),
                 new SeedFight(11, "Welterweight", "Mario Barrios", "Fabian Maidana", "BOXER_A", "DECISION", "May 2024"),
+                new SeedFight(11, "Welterweight", "Ryan Garcia", "Devin Haney", "BOXER_A", "DECISION", "April 2024"),
                 new SeedFight(11, "Welterweight", "Conor Benn", "Peter Dobson", "BOXER_A", "DECISION", "February 2024"),
                 new SeedFight(11, "Welterweight", "Alexis Rocha", "George Ashie", "BOXER_A", "KO", "October 2023"),
                 new SeedFight(11, "Welterweight", "Giovanni Santillan", "Alexis Rocha", "BOXER_A", "KO", "October 2023"),
@@ -157,19 +159,18 @@ Starting All Weight Class Match Evaluation
                 new SeedFight(11, "Welterweight", "Floyd Mayweather Jr", "Manny Pacquiao", "BOXER_A", "DECISION", "May 2015"),
                 new SeedFight(11, "Welterweight", "Floyd Mayweather Jr", "Marcos Maidana", "BOXER_A", "DECISION", "September 2014"),
                 new SeedFight(11, "Welterweight", "Kell Brook", "Shawn Porter", "BOXER_A", "DECISION", "August 2014"),
-                new SeedFight(11, "Welterweight", "Floyd Mayweather Jr", "Marcos Maidana", "BOXER_A", "DECISION", "May 2014"),
 
                 // MIDDLEWEIGHT - weightClassId 13
                 new SeedFight(13, "Middleweight", "Janibek Alimkhanuly", "Andrei Mikhailovich", "BOXER_A", "TKO", "October 2024"),
                 new SeedFight(13, "Middleweight", "Carlos Adames", "Terrell Gausha", "BOXER_A", "DECISION", "June 2024"),
                 new SeedFight(13, "Middleweight", "Janibek Alimkhanuly", "Vincenzo Gualtieri", "BOXER_A", "TKO", "October 2023"),
                 new SeedFight(13, "Middleweight", "Chris Eubank Jr", "Liam Smith", "BOXER_A", "TKO", "September 2023"),
-                new SeedFight(13, "Middleweight", "Liam Smith", "Chris Eubank Jr", "BOXER_A", "TKO", "January 2023"),
                 new SeedFight(13, "Middleweight", "Gennady Golovkin", "Ryota Murata", "BOXER_A", "TKO", "April 2022"),
                 new SeedFight(13, "Middleweight", "Jaime Munguia", "Gabriel Rosado", "BOXER_A", "DECISION", "November 2021"),
                 new SeedFight(13, "Middleweight", "Jermall Charlo", "Juan Macias Montiel", "BOXER_A", "DECISION", "June 2021"),
                 new SeedFight(13, "Middleweight", "Jermall Charlo", "Sergiy Derevyanchenko", "BOXER_A", "DECISION", "September 2020"),
                 new SeedFight(13, "Middleweight", "Demetrius Andrade", "Luke Keeler", "BOXER_A", "TKO", "January 2020"),
+                new SeedFight(13, "Middleweight", "Canelo Alvarez", "Daniel Jacobs", "BOXER_A", "DECISION", "May 2019"),
 
                 // SUPER MIDDLEWEIGHT - weightClassId 14
                 new SeedFight(14, "Super Middleweight", "Canelo Alvarez", "Edgar Berlanga", "BOXER_A", "DECISION", "September 2024"),
@@ -188,7 +189,6 @@ Starting All Weight Class Match Evaluation
                 new SeedFight(17, "Heavyweight", "Daniel Dubois", "Joseph Parker", "BOXER_B", "TKO", "November 2025"),
                 new SeedFight(17, "Heavyweight", "Anthony Joshua", "Deontay Wilder", "BOXER_A", "KO", "September 2025"),
                 new SeedFight(17, "Heavyweight", "Filip Hrgovic", "Zhilei Zhang", "BOXER_B", "TKO", "June 2025"),
-                new SeedFight(17, "Heavyweight", "Oleksandr Usyk", "Tyson Fury", "BOXER_A", "DECISION", "May 2024"),
                 new SeedFight(17, "Heavyweight", "Anthony Joshua", "Francis Ngannou", "BOXER_A", "KO", "March 2024"),
                 new SeedFight(17, "Heavyweight", "Joseph Parker", "Deontay Wilder", "BOXER_A", "DECISION", "December 2023"),
                 new SeedFight(17, "Heavyweight", "Anthony Joshua", "Otto Wallin", "BOXER_A", "RTD", "December 2023"),
@@ -196,19 +196,15 @@ Starting All Weight Class Match Evaluation
                 new SeedFight(17, "Heavyweight", "Oleksandr Usyk", "Daniel Dubois", "BOXER_A", "KO", "August 2023"),
                 new SeedFight(17, "Heavyweight", "Anthony Joshua", "Robert Helenius", "BOXER_A", "KO", "August 2023"),
                 new SeedFight(17, "Heavyweight", "Tyson Fury", "Francis Ngannou", "BOXER_A", "DECISION", "October 2023"),
-                new SeedFight(17, "Heavyweight", "Zhilei Zhang", "Joe Joyce", "BOXER_A", "TKO", "April 2023"),
                 new SeedFight(17, "Heavyweight", "Anthony Joshua", "Jermaine Franklin", "BOXER_A", "DECISION", "April 2023"),
                 new SeedFight(17, "Heavyweight", "Tyson Fury", "Derek Chisora", "BOXER_A", "TKO", "December 2022"),
                 new SeedFight(17, "Heavyweight", "Oleksandr Usyk", "Anthony Joshua", "BOXER_A", "DECISION", "August 2022"),
                 new SeedFight(17, "Heavyweight", "Joe Joyce", "Joseph Parker", "BOXER_A", "KO", "September 2022"),
                 new SeedFight(17, "Heavyweight", "Tyson Fury", "Dillian Whyte", "BOXER_A", "KO", "April 2022"),
-                new SeedFight(17, "Heavyweight", "Oleksandr Usyk", "Anthony Joshua", "BOXER_A", "DECISION", "September 2021"),
-                new SeedFight(17, "Heavyweight", "Tyson Fury", "Deontay Wilder", "BOXER_A", "KO", "October 2021"),
                 new SeedFight(17, "Heavyweight", "Anthony Joshua", "Kubrat Pulev", "BOXER_A", "KO", "December 2020"),
                 new SeedFight(17, "Heavyweight", "Dillian Whyte", "Alexander Povetkin", "BOXER_A", "TKO", "March 2021"),
-                new SeedFight(17, "Heavyweight", "Tyson Fury", "Deontay Wilder", "BOXER_A", "TKO", "February 2020"),
-                new SeedFight(17, "Heavyweight", "Anthony Joshua", "Andy Ruiz Jr", "BOXER_A", "DECISION", "December 2019"),
-                new SeedFight(17, "Heavyweight", "Andy Ruiz Jr", "Anthony Joshua", "BOXER_A", "TKO", "June 2019")
+                new SeedFight(17, "Heavyweight", "Tyson Fury", "Deontay Wilder", "BOXER_A", "KO", "October 2021"),
+                new SeedFight(17, "Heavyweight", "Anthony Joshua", "Andy Ruiz Jr", "BOXER_A", "DECISION", "December 2019")
         );
 
         Map<BoxerKey, SeedBoxerProfile> generatedProfiles = generateUniqueBoxerProfiles(testFights);

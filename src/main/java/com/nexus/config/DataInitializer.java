@@ -19,7 +19,7 @@ public class DataInitializer {
     CommandLineRunner init(AdminRepository adminRepository, PasswordEncoder passwordEncoder) {
         return args -> {
             if (adminRepository.count() == 0) {
-                String[] usernames = {"tywaine", "maurice", "vanessa", "karnardia"};
+                String[] usernames = {"tywaine", "maurice", "vanessa", "karnardia", "Beckford"};
 
                 for (String username : usernames) {
                     Admin admin = Admin.builder()
