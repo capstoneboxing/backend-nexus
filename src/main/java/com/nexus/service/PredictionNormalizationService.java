@@ -57,15 +57,7 @@ public class PredictionNormalizationService {
         }
 
         double raw = (value - range.min()) / (range.max() - range.min());
-        double clamped = Math.clamp(raw, 0.0, 1.0);
-
-/*        System.out.printf("""
-                [MEASUREMENT]
-                value=%s | min=%s | max=%s
-                raw=%s | clamped=%s
-                %n""", value, range.min(), range.max(), raw, clamped);*/
-
-        return clamped;
+        return Math.clamp(raw, 0.0, 1.0);
     }
 
     public double normalizeRubricScore(Double value) {
@@ -75,15 +67,7 @@ public class PredictionNormalizationService {
         }
 
         double raw = (value - 1.0) / 9.0;
-        double clamped = Math.clamp(raw, 0.0, 1.0);
-
-/*        System.out.printf("""
-                [RUBRIC]
-                value=%s
-                raw=%s | clamped=%s
-                %n""", value, raw, clamped);*/
-
-        return clamped;
+        return Math.clamp(raw, 0.0, 1.0);
     }
 
     public double normalizeRatio(Double value) {
@@ -92,13 +76,6 @@ public class PredictionNormalizationService {
             return 0.5;
         }
 
-        double clamped = Math.clamp(value, 0.0, 1.0);
-
-/*        System.out.printf("""
-                [RATIO]
-                value=%s | clamped=%s
-                %n""", value, clamped);*/
-
-        return clamped;
+        return Math.clamp(value, 0.0, 1.0);
     }
 }

@@ -329,8 +329,7 @@ Generated successfully:
 
         double baseCloseness = scoringService.closeness(
                 scores,
-                perfectScores,
-                weights
+                perfectScores
         );
 
         double adjustedCloseness = scoringService.applyAttributeConfidence(

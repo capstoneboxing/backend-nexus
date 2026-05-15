@@ -179,7 +179,7 @@ public class PredictionScoringService {
         return AppUtils.roundTo2DecimalPlaces(overallScore);
     }
 
-    public double closeness(CategoryScores fighter, CategoryScores perfect, CategoryWeight weights) {
+    public double closeness(CategoryScores fighter, CategoryScores perfect) {
         double distance =
                 Math.abs(fighter.physical() - perfect.physical()) +
                         Math.abs(fighter.technical() - perfect.technical()) +
@@ -187,21 +187,11 @@ public class PredictionScoringService {
                         Math.abs(fighter.psychological() - perfect.psychological()) +
                         Math.abs(fighter.experience() - perfect.experience());
 
-        double maxDistance =
-                weights.getPhysicalWeight() +
-                        weights.getTechnicalWeight() +
-                        weights.getTacticalWeight() +
-                        weights.getPsychologicalWeight() +
-                        weights.getExperienceWeight();
+        double closeness = 1.0 - distance;
 
-        if (maxDistance == 0.0) {
-            return 0.5;
-        }
-
-        double closeness = 1.0 - (distance / maxDistance);
-        closeness = AppUtils.roundTo2DecimalPlaces(closeness);
-
-        return Math.clamp(closeness, 0.0, 1.0);
+        return AppUtils.roundTo2DecimalPlaces(
+                Math.clamp(closeness, 0.0, 1.0)
+        );
     }
 
     public double probability(double closenessA, double closenessB) {

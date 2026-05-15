@@ -90,8 +90,8 @@ public class MatchPredictionService {
         double overallScoreB = scoringService.overallScore(scoresB);
         double overallPerfectScore = scoringService.overallScore(perfectScores);
 
-        double baseClosenessA = scoringService.closeness(scoresA, perfectScores, weights);
-        double baseClosenessB = scoringService.closeness(scoresB, perfectScores, weights);
+        double baseClosenessA = scoringService.closeness(scoresA, perfectScores);
+        double baseClosenessB = scoringService.closeness(scoresB, perfectScores);
 
         double closenessA = scoringService.applyAttributeConfidence(
                 baseClosenessA,
@@ -151,41 +151,36 @@ public class MatchPredictionService {
                 explanation
         );
 
-        try {
-            PredictionHistory saved = predictionHistoryRepository.save(
-                    PredictionHistory.builder()
-                            .boxerAName(request.boxerA().boxerName())
-                            .boxerBName(request.boxerB().boxerName())
-                            .predictedWinner(predictedWinner)
-                            .matchWinner(null)
-                            .matchWinMethod(null)
-                            .weightClassId(request.weightClassId())
-                            .boxerAClosenessScore(closenessA)
-                            .boxerBClosenessScore(closenessB)
-                            .probabilityA(probabilityA)
-                            .probabilityB(probabilityB)
-                            .breakdownSnapshot(breakdownSnapshot)
-                            .predictionDate(OffsetDateTime.now())
-                            .build()
-            );
+        PredictionHistory saved = predictionHistoryRepository.save(
+                PredictionHistory.builder()
+                        .boxerAName(request.boxerA().boxerName())
+                        .boxerBName(request.boxerB().boxerName())
+                        .predictedWinner(predictedWinner)
+                        .matchWinner(null)
+                        .matchWinMethod(null)
+                        .weightClassId(request.weightClassId())
+                        .boxerAClosenessScore(closenessA)
+                        .boxerBClosenessScore(closenessB)
+                        .probabilityA(probabilityA)
+                        .probabilityB(probabilityB)
+                        .breakdownSnapshot(breakdownSnapshot)
+                        .predictionDate(OffsetDateTime.now())
+                        .build()
+        );
 
-            return new PredictionResponse(
-                    saved.getPredictionId(),
-                    saved.getBoxerAName(),
-                    saved.getBoxerBName(),
-                    saved.getPredictedWinner(),
-                    saved.getWeightClassId(),
-                    saved.getBoxerAClosenessScore(),
-                    saved.getBoxerBClosenessScore(),
-                    saved.getProbabilityA(),
-                    saved.getProbabilityB(),
-                    explanation,
-                    saved.getPredictionDate()
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
+        return new PredictionResponse(
+                saved.getPredictionId(),
+                saved.getBoxerAName(),
+                saved.getBoxerBName(),
+                saved.getPredictedWinner(),
+                saved.getWeightClassId(),
+                saved.getBoxerAClosenessScore(),
+                saved.getBoxerBClosenessScore(),
+                saved.getProbabilityA(),
+                saved.getProbabilityB(),
+                explanation,
+                saved.getPredictionDate()
+        );
     }
 
     private JsonNode buildBreakdownSnapshot(
